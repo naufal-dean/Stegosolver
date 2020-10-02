@@ -18,35 +18,41 @@ class StegoAudio:
 
     def is_enough_frames(self):
         # yang disisipkan pada frame:
-        # 1. file dlm bit
+        # 1. file dlm bit + 24*8 bit (panjang data)
         # 2. nama file dlm bit + 8 bit (menandakan panjang nama file dlm string)
         # 3. 1 bit untuk menandakan dia acak atau sekuensial
-        return len(self.audio_frames) >= (len(self.data) + len(self.filename)) * 8 + 9
+        return len(self.audio_frames) >= (len(self.data) + len(self.filename) + 24) * 8 + 9
 
     def sequential_hide(self):
-        # hide filename length indeks 1 - 8
+        # hide filename length, indeks 1 - 8
         filename_len = len(self.filename)
+        print(filename_len)
         for i, bit in enumerate(bin(filename_len).lstrip('0b').rjust(8,'0')):
             self.audio_frames[i+1] = self.audio_frames[i+1] & 254 | int(bit)
-
-        # hide filename indeks 9 dst
-        filename_bit = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in self.filename])))
-        for i, bit in enumerate(filename_bit):
+        # hide length file, indeks 9 - 9+24*8
+        data_len = len(self.data)
+        print(data_len)
+        for i, bit in enumerate(bin(data_len).lstrip('0b').rjust(24*8,'0')):
             self.audio_frames[i+9] = self.audio_frames[i+9] & 254 | int(bit)
 
+        # hide filename, indeks 9+24*8 dst
+        filename_bit = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in self.filename])))
+        for i, bit in enumerate(filename_bit):
+            self.audio_frames[i+9+24*8] = self.audio_frames[i+9+24*8] & 254 | int(bit)
+
         # hide file
-        s = len(filename_bit) + 9
+        s = len(filename_bit) + 9 + 24 * 8
         bit_data = list(map(int, ''.join([bin(i).lstrip('0b').rjust(8,'0') for i in self.data])))
         for i, bit in enumerate(bit_data):
             self.audio_frames[i+s] = self.audio_frames[i+s] & 254 | int(bit)
         
         # tambal sama 0
-        frames_cnt = len(self.audio_frames)
-        data_cnt = len(bit_data)
-        if frames_cnt > data_cnt:
-            print("yey")
-            for i in range(data_cnt+len(filename_bit)+9, frames_cnt):
-                self.audio_frames[i] = self.audio_frames[i] & 254
+        # frames_cnt = len(self.audio_frames)
+        # data_cnt = len(bit_data)
+        # if frames_cnt > data_cnt:
+        #     print("yey")
+        #     for i in range(data_cnt+len(filename_bit)+9, frames_cnt):
+        #         self.audio_frames[i] = self.audio_frames[i] & 254
         
     # def random_hide():
     #     # generate random 
@@ -74,17 +80,23 @@ class StegoAudio:
         filename_len = 0
         for i in range(1, 9):
             filename_len |= self.bit_extracted[i] << (8-i)
-
+        print(filename_len)
+        # get data len
+        data_len = 0
+        for i in range(9, 9+24*8):
+            data_len |= self.bit_extracted[i] << (24*8+8-i)
+        print(data_len)
         # get filename
         # panjang bitnya = panjang filename * 8 (duh)
-        self.filename = ''.join(chr(int(''.join(map(str,self.bit_extracted[i:i+8])),2)) for i in range(9,9+filename_len*8,8))
+        s = 9+24*8
+        self.filename = ''.join(chr(int(''.join(map(str,self.bit_extracted[i:i+8])),2)) for i in range(s,s+filename_len*8,8))
         
         # get data
-        frames_cnt = len(self.audio_frames)
-        self.data = bytearray(0)
-        str_data = ''.join(chr(int(''.join(map(str,self.bit_extracted[i:i+8])),2)) for i in range(9+filename_len*8,frames_cnt,8))
-        print(str_data)
-        self.data[0:] = bytes(str_data, encoding='utf-8')
+        # self.data = bytearray(0)
+        s = s + filename_len*8
+        self.data = b''.join((int(''.join(map(str,self.bit_extracted[i:i+8])),2)).to_bytes(1, byteorder='big') for i in range(s,s+data_len*8,8))
+
+        print(len(self.data))
     
     def extract_lsb(self):
         self.bit_extracted = [self.audio_frames[i] & 1 for i in range(len(self.audio_frames))]
@@ -122,9 +134,9 @@ if __name__ == '__main__':
     key = "STEGANO"
     path = "test.wav"
     hide = StegoAudio(key, path)
-    hide.hide_lsb("../plan.txt", 1)
+    hide.hide_lsb("test.mp3", 1)
     hide.save_stego_audio("save.wav")
 
     extractor = StegoAudio(key, "save.wav")
     extractor.extract_lsb()
-    extractor.save_extracted_file("lala.txt")
+    extractor.save_extracted_file("lala.mp3")
