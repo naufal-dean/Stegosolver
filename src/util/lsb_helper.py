@@ -28,7 +28,7 @@ class LSBHelper:
 
     @staticmethod
     def insert_data_as_lsb(byte_list : list, is_sequential : bool, filename : str,
-                           contents : int, seed : str = None) -> list:
+                           contents : bytes, seed : str = None) -> list:
         # 1 byte sequential flag, 1 byte filename len, filename, 3 byte contents len, contents
         # byte sequential flag: 255 sequential, 0 random
         sequential_flag = i2b(255, 1) if is_sequential else i2b(0, 1)

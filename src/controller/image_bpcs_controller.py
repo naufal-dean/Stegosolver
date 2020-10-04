@@ -353,7 +353,7 @@ class MessagePacker:
 
     @staticmethod
     def unpack_message(message : np.ndarray):
-        bit_string = ''.join(list(map(str, np.append(message, np.array([], dtype=np.ndarray)))))
+        bit_string = ''.join(list(map(str, np.append(message, np.array([], dtype=np.uint8)))))
         payload = int(bit_string, 2).to_bytes(len(message) * 8, byteorder='big')
         payload = MessagePacker.unpad(payload)
         return payload
