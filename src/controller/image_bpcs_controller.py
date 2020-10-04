@@ -259,14 +259,12 @@ class StegoImageBPCS:
         self.extracted_data = self.extract_data_from_bit_plane(f_blocks)
         print(self.extracted_data)
 
-    def save_stego_image(self, out_path = None):
+    def save_stego_image(self, out_path):
         if self.stego_image is None:
             raise Exception('Stego image not exists!')
-        out_path = out_path or 'defname.png'
         self.stego_image.save(out_path)
 
     def save_extracted_data(self, out_path = None):
-        self.extracted_data = b'hehe'
         if self.extracted_data is None:
             raise Exception('Extracted data not exists!')
         out_path = out_path or 'defname.txt'
