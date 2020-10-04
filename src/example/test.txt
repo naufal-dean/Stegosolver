@@ -1,0 +1,77 @@
+data structure
+
+enum : data type
+- data
+- fin
+- ack
+- fin_ack
+- metadata
+- metadata_ack
+
+datagram : 1 file keseluruhan
+- namafile
+- data (byte)
+- number of sequence
+- getPackets() : ubah semua data jadi packet return array of packet
+	- seq 0 = metadata
+	- seq terakhir = fin
+	- sisanya = data
+
+
+packet : yg dikirim lewat udp
+- type
+- seqnum
+- checksum
+- data (byte)
+
+- cekChecksum()
+- byteToPacket() : alt pake constructor nerima param array of byte (buat penerima)
+- packetToByte(): ubah semua packet jd byte buat dikirim ke socket (buat pengirim)
+
+
+di sender (client)
+- minta port server (banyak)
+- minta path file
+- start socket
+- ubah file jd datagram
+- packet 0 : isinya metadata
+- get packet : kembaliin array of packet
+- sendMultithread() : true kalo semua sendPacketData return true
+	- sendPacketData(packet[0] - packet[len])
+- sendPacketData() : true kalo kita nerima ack
+	- sendto ke address server
+	- kasi timeout
+	- kalau lewat timeout sendto lagi
+	- kalau timeout 5x return false
+	- kalo dapet ack return true
+- if (sendMultithread()):
+- sendPacketFin() : true kalo kita nerima fin_ack 
+	- sendto(fin)
+	- timeout blablabla
+- endif
+
+di receiver (server)
+- minta port server
+- bikin socket
+- bind address
+- while
+- recvfrom packet 
+	- packet[0] = data : byte diubah jd Packet
+		- type
+		- seqnum
+		- checksum
+		- data 
+	- packet[1] = ip
+- sendACK()
+	- cek ceksum
+	- cek type
+- bikin dict
+	- key = sequence number
+	- value = byte data
+- kalo terima packet bertipe fin
+	- send fin_ack
+	- konstruksi file
+	- cek seqnum 0, dia mengandung metadata
+	- for i = 1; i <= fin.seqnum; i++ : byte
+	- simpen file
+
