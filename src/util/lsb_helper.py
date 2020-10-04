@@ -1,4 +1,5 @@
 import itertools
+import numpy as np
 import random
 
 from exception import NotEnoughCapacityException
@@ -11,9 +12,10 @@ b2i = lambda x: int.from_bytes(x, byteorder='big')
 class LSBHelper:
     @staticmethod
     def get_rand_idx(idx_list : list, seed : str) -> list:
-        random.seed(seed)
-        idx_list_out = random.sample(idx_list, len(idx_list))
-        return idx_list_out
+        np.random.seed(b2i(seed.encode('latin-1')) % (2 ** 32))
+        idx_list_out = np.array(idx_list)
+        np.random.shuffle(idx_list_out)
+        return idx_list_out.tolist()
 
     @staticmethod
     def seq_lsb_generator(byte_list : list):
@@ -28,7 +30,7 @@ class LSBHelper:
 
     @staticmethod
     def insert_data_as_lsb(byte_list : list, is_sequential : bool, filename : str,
-                           contents : int, seed : str = None) -> list:
+                           contents : bytes, seed : str = None) -> list:
         # 1 byte sequential flag, 1 byte filename len, filename, 3 byte contents len, contents
         # byte sequential flag: 255 sequential, 0 random
         sequential_flag = i2b(255, 1) if is_sequential else i2b(0, 1)
