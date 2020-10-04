@@ -209,6 +209,7 @@ class StegoImageBPCS:
     def insert_data_to_bit_plane(self, f_blocks_bit_planes_pbc : np.ndarray, is_sequential : bool, data : bytes):
         bl_height, bl_width, channel_count, bp_count, pl_height, pl_width = f_blocks_bit_planes_pbc.shape
         message = MessagePacker.pack_message(data)
+        print(message)
         # copy to new array
         new_f_blocks_bit_planes_pbc = np.copy(f_blocks_bit_planes_pbc)
         # insert message to noise-like region
@@ -223,9 +224,10 @@ class StegoImageBPCS:
                             continue
                         message_bit_plane = message[inserted_message_count]
                         if not self.is_noise_like(message_bit_plane):
+                            print('conjugate')
                             message_bit_plane = self.conjugate(message_bit_plane)
                             conjugate_pos_map.append((i, j, k, l))
-                        print(i, j, k, l)
+                        print(f'inserted in {(i, j, k, l)}')
                         inserted_message_count += 1
                         # convert message to pbc system
                         message_bit_plane = self.cgc2pbc(message_bit_plane)
@@ -247,13 +249,16 @@ class StegoImageBPCS:
         # get bit planes
         f_blocks_bit_planes_pbc = self.get_all_bit_plane_from_f_blocks(f_blocks)
         # insert data to bit plane
+        print('inserting data')
         new_f_blocks_bit_planes_pbc, conjugate_pos_map = self.insert_data_to_bit_plane(f_blocks_bit_planes_pbc, True, data)
+        print('inserting data end')
+        print(conjugate_pos_map)
         # construct stego_image
         new_f_blocks = self.f_blocks_bit_planes_to_f_blocks(new_f_blocks_bit_planes_pbc)
         new_uf_blocks = self.unflatten_blocks(new_f_blocks)
         new_image_data = self.blocks_to_image_data(new_uf_blocks, image_data.shape)
         self.stego_image = Image.fromarray(new_image_data)
-        self.stego_image.show()
+        # self.stego_image.show()
         # self.test_reconstruct_img(f_blocks, image_data.shape, image_data)
 
     def test_reconstruct_img(self, flattened_blocks, image_data_shape, init_image_data):
@@ -261,14 +266,58 @@ class StegoImageBPCS:
         new_image_data = self.blocks_to_image_data(unflattened_blocks, image_data_shape)
         Image.fromarray(new_image_data).show()
 
+    def extract_data_from_bit_plane(self, f_blocks_bit_planes_pbc : np.ndarray):
+        bl_height, bl_width, channel_count, bp_count, pl_height, pl_width = f_blocks_bit_planes_pbc.shape
+        # read metadata
+        conjugate_pos_map = [(5, 46, 0, 4)]
+        # insert message to noise-like region
+        message = []
+        extracted_message_count = 0
+        for i in range(bl_height):
+            for j in range(bl_width):
+                for k in range(channel_count):
+                    for l in range(bp_count):
+                        # read candidate
+                        cand_message_bit_plane = self.pbc2cgc(f_blocks_bit_planes_pbc[i][j][k][l])
+                        # check if noise like
+                        if not self.is_noise_like(cand_message_bit_plane):
+                            continue
+                        # check if conjugate
+                        if (i, j, k, l) in conjugate_pos_map:
+                            print('conjugating')
+                            cand_message_bit_plane = self.conjugate(cand_message_bit_plane)
+                        # store message bit plane
+                        message.append(cand_message_bit_plane)
+                        print(f'extracted from {(i, j, k, l)}')
+                        extracted_message_count += 1
+                        # if all message inserted return
+                        if extracted_message_count == 2:
+                            print(np.array(message))
+                            return MessagePacker.unpack_message(np.array(message))
+        # failed to retrieve all message
+        raise Exception('Image ended when searching hidden message')
+
     def extract_data(self):
-        pass
+        image_data = np.array(self.image)
+        image_data = self.pad_image(image_data)
+        im_height, im_width, channel_count = image_data.shape
+        # get image blocks
+        blocks = self.image_data_to_blocks(image_data)
+        f_blocks = self.flatten_blocks(blocks)
+        # get bit planes
+        f_blocks_bit_planes_pbc = self.get_all_bit_plane_from_f_blocks(f_blocks)
+        # extract data from bit plane
+        print('extracting data')
+        self.extracted_data = self.extract_data_from_bit_plane(f_blocks_bit_planes_pbc)
+        print('extracting data end')
+        print(self.extracted_data)
+
 
     def save_stego_image(self, out_path = None):
         if self.stego_image is None:
             raise Exception('Stego image not exists!')
         out_path = out_path or 'defname.png'
-        self.image.save(out_path)
+        self.stego_image.save(out_path)
 
     def save_extracted_data(self, out_path = None):
         self.extracted_data = b'hehe'
@@ -314,62 +363,9 @@ class MessagePacker:
 
 if __name__ == '__main__':
     s = StegoImageBPCS('../example/raw.png')
+    s.insert_data(b'hehehehe')
+    s.save_stego_image('out.png')
+    del s
 
-    s.insert_data(b'hehe')
-
-    # m = MessagePacker.pack_message(b'testtet')
-    # print(m.shape)
-    # # print(m)
-    # u = MessagePacker.unpack_message(m)
-    # print(u)
-    # # u = MessagePacker.unpad(m)
-    # # print(u)
-
-    # a = np.array([
-    #     [0,1,1,0,0,1,0,1],
-    #     [0,0,1,1,0,0,1,1],
-    #     [1,0,0,1,1,1,1,0],
-    #     [0,0,0,0,1,1,0,0],
-    #     [1,0,0,0,0,0,0,0],
-    #     [1,0,1,0,0,0,0,0],
-    #     [0,1,1,1,1,1,1,0],
-    #     [0,1,1,0,0,1,1,0],
-    # ])
-    # b = a
-    # b[0,0] = 99
-    # print(id(a))
-    # print(id(b))
-    # print(a)
-    # l = [99, 99]
-    # a[:3,:2] = [
-    #     l,
-    #     [99, 99],
-    #     [99, 99],
-    # ]
-    # print(a)
-    # a[0,0] = 88
-    # print(a)
-    # print(l)
-
-    #
-    # print(a)
-    # # print(s.complexity(a))
-    # # cgc = (s.pbc2cgc(a))
-    # # print(cgc)
-    # # pbc = (s.cgc2pbc(cgc))
-    # # print(pbc)
-    # # print(a == pbc)
-    # # print(s.get_wc_plane())
-    # ac = (s.conjugate(a))
-    # print(ac)
-    # print(a ^ (ac))
-
-
-
-    # img = Image.open('../example/raw.png').convert('RGB')
-    # # img.show()
-    # print(img.size)
-    # imgdata = np.array(img)
-    # print(imgdata.shape)
-    #
-    # Image.fromarray(imgdata).show()
+    s2 = StegoImageBPCS('out.png')
+    s2.extract_data()
