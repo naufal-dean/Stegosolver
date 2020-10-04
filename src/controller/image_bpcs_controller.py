@@ -30,6 +30,9 @@ class StegoImageBPCS:
             color_change += sum([c[i] != c[i+1] for i in range(bit_plane.shape[0] - 1)])
         return color_change / MAX_COLOR_CHANGE_ON_8_8_PLANE
 
+    def is_noise_like(self, bit_plane : np.ndarray):
+        return self.complexity(bit_plane) >= self.threshold
+
     def identify_noise_like_region(self, f_blocks_bit_planes_cgc : np.ndarray):
         # True if it is noise-like region
         bl_height, bl_width, channel_count, bp_count, _, _ = f_blocks_bit_planes_cgc.shape
@@ -69,7 +72,6 @@ class StegoImageBPCS:
                 for k in range(channel_count):
                     for l in range(bp_count):
                         f_blocks_bit_planes_cgc[i][j][k][l] = self.pbc2cgc(f_blocks_bit_planes_pbc[i][j][k][l])
-                        print(i,j,k,l)
         return f_blocks_bit_planes_cgc
 
     def f_blocks_bit_planes_to_pbc(self, f_blocks_bit_planes_cgc : np.ndarray):
@@ -189,14 +191,9 @@ class StegoImageBPCS:
         _, pl_height, pl_width = bit_planes.shape
         block_shape = (pl_height, pl_width)
         block = np.zeros(block_shape, dtype=np.uint8)
-        print('===========open====')
-        print(bit_planes)
-        print('===========st====')
         for i in range(len(bit_planes)):
             block <<= 1
             block += bit_planes[i]
-        print(block)
-        print('===============')
         return block
 
     def f_blocks_bit_planes_to_f_blocks(self, f_blocks_bit_planes_pbc : np.ndarray):
@@ -207,9 +204,38 @@ class StegoImageBPCS:
             for j in range(bl_width):
                 for k in range(channel_count):
                     f_blocks[i][j][k] = self.all_bit_plane_to_block(f_blocks_bit_planes_pbc[i][j][k])
-        print(f_blocks_bit_planes_pbc[0][0][0])
-        print(f_blocks[0][0][0])
         return f_blocks
+
+    def insert_data_to_bit_plane(self, f_blocks_bit_planes_pbc : np.ndarray, is_sequential : bool, data : bytes):
+        bl_height, bl_width, channel_count, bp_count, pl_height, pl_width = f_blocks_bit_planes_pbc.shape
+        message = MessagePacker.pack_message(data)
+        # copy to new array
+        new_f_blocks_bit_planes_pbc = np.copy(f_blocks_bit_planes_pbc)
+        # insert message to noise-like region
+        conjugate_pos_map = []
+        inserted_message_count = 0
+        for i in range(bl_height):
+            for j in range(bl_width):
+                for k in range(channel_count):
+                    for l in range(bp_count):
+                        temp_cgc_bp = self.pbc2cgc(f_blocks_bit_planes_pbc[i][j][k][l])
+                        if not self.is_noise_like(temp_cgc_bp):
+                            continue
+                        message_bit_plane = message[inserted_message_count]
+                        if not self.is_noise_like(message_bit_plane):
+                            message_bit_plane = self.conjugate(message_bit_plane)
+                            conjugate_pos_map.append((i, j, k, l))
+                        print(i, j, k, l)
+                        inserted_message_count += 1
+                        # convert message to pbc system
+                        message_bit_plane = self.cgc2pbc(message_bit_plane)
+                        # insert to bit plane
+                        new_f_blocks_bit_planes_pbc[i][j][k][l] = message_bit_plane
+                        # if all message inserted return
+                        if inserted_message_count == message.shape[0]:
+                            return new_f_blocks_bit_planes_pbc, conjugate_pos_map
+        # failed to insert all message
+        raise Exception('Not enough noise-like region to store data')
 
     def insert_data(self, data):
         image_data = np.array(self.image)
@@ -219,27 +245,14 @@ class StegoImageBPCS:
         blocks = self.image_data_to_blocks(image_data)
         f_blocks = self.flatten_blocks(blocks)
         # get bit planes
-        print('test')
         f_blocks_bit_planes_pbc = self.get_all_bit_plane_from_f_blocks(f_blocks)
-        # convert bit planes to cgc system
-        print('test')
-        f_blocks_bit_planes_cgc = self.f_blocks_bit_planes_to_cgc(f_blocks_bit_planes_pbc)
-        # classify region
-        print('test')
-        is_noise_like_map = self.identify_noise_like_region(f_blocks_bit_planes_cgc)
-
-
-        print('test')
+        # insert data to bit plane
+        new_f_blocks_bit_planes_pbc, conjugate_pos_map = self.insert_data_to_bit_plane(f_blocks_bit_planes_pbc, True, data)
         # construct stego_image
-        new_f_blocks_bit_planes_pbc = self.f_blocks_bit_planes_to_pbc(f_blocks_bit_planes_cgc)
-        print('test')
         new_f_blocks = self.f_blocks_bit_planes_to_f_blocks(new_f_blocks_bit_planes_pbc)
-        # print(new_f_blocks == f_blocks)
-        print('test')
         new_uf_blocks = self.unflatten_blocks(new_f_blocks)
         new_image_data = self.blocks_to_image_data(new_uf_blocks, image_data.shape)
         self.stego_image = Image.fromarray(new_image_data)
-
         self.stego_image.show()
         # self.test_reconstruct_img(f_blocks, image_data.shape, image_data)
 
@@ -266,10 +279,51 @@ class StegoImageBPCS:
             f.write(self.extracted_data)
 
 
+class MessagePacker:
+    @staticmethod
+    def pad(payload : bytes):
+        pad_len = 8 - (len(payload) % 8)
+        pad = chr(pad_len).encode('latin-1') * pad_len
+        return payload + pad
+
+    @staticmethod
+    def unpad(padded_payload : bytes):
+        pad_len = padded_payload[-1]
+        return padded_payload[:-pad_len]
+
+    @staticmethod
+    def pack_message(payload : bytes):
+        block_size = PLANE_HEIGHT * PLANE_WIDTH
+        payload = MessagePacker.pad(payload)
+        bit_payload = list(map(int, ''.join([bin(i).lstrip('0b').rjust(8,'0') for i in payload])))
+        message = []
+        for i in range(0, len(bit_payload), block_size):
+            temp = bit_payload[i:i+block_size]
+            message.append([temp[j:j+PLANE_HEIGHT] for j in range(0, len(temp), PLANE_HEIGHT)])
+        return np.array(message)
+
+    @staticmethod
+    def unpack_message(message : np.ndarray):
+        bit_string = ''.join(list(map(str, np.append(message, np.array([], dtype=np.ndarray)))))
+        payload = int(bit_string, 2).to_bytes(len(message) * 8, byteorder='big')
+        payload = MessagePacker.unpad(payload)
+        return payload
+
+
+
+
 if __name__ == '__main__':
     s = StegoImageBPCS('../example/raw.png')
 
     s.insert_data(b'hehe')
+
+    # m = MessagePacker.pack_message(b'testtet')
+    # print(m.shape)
+    # # print(m)
+    # u = MessagePacker.unpack_message(m)
+    # print(u)
+    # # u = MessagePacker.unpad(m)
+    # # print(u)
 
     # a = np.array([
     #     [0,1,1,0,0,1,0,1],
