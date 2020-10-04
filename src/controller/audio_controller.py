@@ -1,11 +1,36 @@
 import wave
 import os
 import mmap
+from util.lsb_helper import LSBHelper, i2b, b2i
+from scipy.io import wavfile
+import numpy as np
+from math import log10, sqrt 
 
-# todo
-# 1. Implemen panjang data int = 24 bytes = 24*8 bit
-#    alasan : file ttp nulis \x00 gt jd gbs dibuka
-# 2. Random hide & extract
+def signaltonoise(a, axis=0, ddof=0):
+    a = np.asanyarray(a)
+    m = a.mean(axis)
+    sd = a.std(axis=axis, ddof=ddof)
+    return np.where(sd == 0, 0, m/sd)
+
+def psnr(path1, path2):
+    amp1 = wavfile.read(path1)[1]
+    amp2 = wavfile.read(path2)[1]
+    single1 = amp1
+    single2 = amp2
+    try:
+        single1 = np.sum(amp1, axis=1)
+        single2 = np.sum(amp2, axis=1)
+    except:
+        pass
+    norm1 = single1 / (max(np.amax(single1), -1 * np.amin(single1)))
+    norm2 = single2 / (max(np.amax(single2), -1 * np.amin(single2)))
+    # psnr = 10 * 
+    snr1 = signaltonoise(norm1)
+    snr2 = signaltonoise(norm2)
+
+    psnr = 10 * log10((snr2**2)/(snr2**2+snr1**2-2*snr1*snr2))
+    print(psnr)
+    return psnr
 
 class StegoAudio:
     def __init__(self, key, audio_path):
@@ -16,94 +41,19 @@ class StegoAudio:
         # get audio frames
         self.audio_frames = bytearray(list(self.audio.readframes(self.audio.getnframes())))
 
-    def is_enough_frames(self):
-        # yang disisipkan pada frame:
-        # 1. file dlm bit + 24*8 bit (panjang data)
-        # 2. nama file dlm bit + 8 bit (menandakan panjang nama file dlm string)
-        # 3. 1 bit untuk menandakan dia acak atau sekuensial
-        return len(self.audio_frames) >= (len(self.data) + len(self.filename) + 24) * 8 + 9
-
-    def sequential_hide(self):
-        # hide filename length, indeks 1 - 8
-        filename_len = len(self.filename)
-        print(filename_len)
-        for i, bit in enumerate(bin(filename_len).lstrip('0b').rjust(8,'0')):
-            self.audio_frames[i+1] = self.audio_frames[i+1] & 254 | int(bit)
-        # hide length file, indeks 9 - 9+24*8
-        data_len = len(self.data)
-        print(data_len)
-        for i, bit in enumerate(bin(data_len).lstrip('0b').rjust(24*8,'0')):
-            self.audio_frames[i+9] = self.audio_frames[i+9] & 254 | int(bit)
-
-        # hide filename, indeks 9+24*8 dst
-        filename_bit = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in self.filename])))
-        for i, bit in enumerate(filename_bit):
-            self.audio_frames[i+9+24*8] = self.audio_frames[i+9+24*8] & 254 | int(bit)
-
-        # hide file
-        s = len(filename_bit) + 9 + 24 * 8
-        bit_data = list(map(int, ''.join([bin(i).lstrip('0b').rjust(8,'0') for i in self.data])))
-        for i, bit in enumerate(bit_data):
-            self.audio_frames[i+s] = self.audio_frames[i+s] & 254 | int(bit)
-        
-        # tambal sama 0
-        # frames_cnt = len(self.audio_frames)
-        # data_cnt = len(bit_data)
-        # if frames_cnt > data_cnt:
-        #     print("yey")
-        #     for i in range(data_cnt+len(filename_bit)+9, frames_cnt):
-        #         self.audio_frames[i] = self.audio_frames[i] & 254
-        
-    # def random_hide():
-    #     # generate random 
-
-    def hide_lsb(self, file_path, is_sequential):
+    def insert_data(self, file_path, is_sequential):
         # get file name & convert to list of bit
         self.filename = os.path.split(file_path)[1]
         # get file & convert file to list of bit
         with open(file_path, 'r+b') as f:
             mem = mmap.mmap(f.fileno(), 0)
             self.data = bytearray(mem)
-        sequential = is_sequential
+        self.audio_frames = LSBHelper.insert_data_as_lsb(self.audio_frames,
+                            is_sequential, self.filename, self.data)
 
-        # cek muat atau ndak
-        if self.is_enough_frames():
-            # hide sequential
-            self.audio_frames[0] = self.audio_frames[0] & 254 | sequential
-            if sequential:
-                self.sequential_hide()
-        else:
-            print("gak muat")
-    
-    def sequential_extract(self):
-        # get filename length
-        filename_len = 0
-        for i in range(1, 9):
-            filename_len |= self.bit_extracted[i] << (8-i)
-        print(filename_len)
-        # get data len
-        data_len = 0
-        for i in range(9, 9+24*8):
-            data_len |= self.bit_extracted[i] << (24*8+8-i)
-        print(data_len)
-        # get filename
-        # panjang bitnya = panjang filename * 8 (duh)
-        s = 9+24*8
-        self.filename = ''.join(chr(int(''.join(map(str,self.bit_extracted[i:i+8])),2)) for i in range(s,s+filename_len*8,8))
+    def extract_data(self):
         
-        # get data
-        # self.data = bytearray(0)
-        s = s + filename_len*8
-        self.data = b''.join((int(''.join(map(str,self.bit_extracted[i:i+8])),2)).to_bytes(1, byteorder='big') for i in range(s,s+data_len*8,8))
-
-        print(len(self.data))
-    
-    def extract_lsb(self):
-        self.bit_extracted = [self.audio_frames[i] & 1 for i in range(len(self.audio_frames))]
-        
-        # cek sekuensial
-        if self.bit_extracted[0]:
-            self.sequential_extract()
+        self.filename, self.data = LSBHelper.extract_data_from_lsb(self.audio_frames)
 
     def save_stego_audio(self, dest_filename = None):
         # write audio
@@ -130,13 +80,4 @@ class StegoAudio:
         extracted_file.close()
         self.audio.close()
 
-if __name__ == '__main__':
-    key = "STEGANO"
-    path = "test.wav"
-    hide = StegoAudio(key, path)
-    hide.hide_lsb("test.mp3", 1)
-    hide.save_stego_audio("save.wav")
 
-    extractor = StegoAudio(key, "save.wav")
-    extractor.extract_lsb()
-    extractor.save_extracted_file("lala.mp3")
