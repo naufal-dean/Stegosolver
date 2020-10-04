@@ -1,4 +1,7 @@
+import itertools
+import math
 import numpy as np
+import os
 from PIL import Image
 
 
@@ -15,6 +18,7 @@ class StegoImageBPCS:
         self.__gen_wc_plane()
         self.stego_image = None
         self.extracted_data = None
+        self.extracted_filename = None
 
     def __gen_wc_plane(self):
         temp = []
@@ -153,18 +157,29 @@ class StegoImageBPCS:
             block += bit_planes[i]
         return block
 
-    def insert_data_to_bit_plane(self, f_blocks : np.ndarray, is_sequential : bool, data : bytes):
+    def insert_data_to_bit_plane(self, f_blocks : np.ndarray, is_sequential : bool,
+                                 message : np.ndarray, conjugate_map_len : int):
         bl_height, bl_width, channel_count, pl_height, pl_width = f_blocks.shape
-        message = MessagePacker.pack_message(data)
-        print(message)
         # copy to new array
         new_f_blocks = np.copy(f_blocks)
+        # skip reserved header and conjugate map blocks
+        skip_counter = math.ceil((conjugate_map_len + 1) / 8)
+        for si in range(bl_height):
+            for sj in range(bl_width):
+                for sk in range(channel_count):
+                    if skip_counter == 0: break
+                    skip_counter -= 1
+                if skip_counter == 0: break
+            if skip_counter == 0: break
+        print(f'started at = {si, sj, sk}')
+        if skip_counter != 0:
+            raise Exception('Not enough noise-like region to store data')
         # insert message to noise-like region
-        conjugate_pos_map = []
+        conjugate_flag = []
         inserted_message_count = 0
-        for i in range(bl_height):
-            for j in range(bl_width):
-                for k in range(channel_count):
+        for i in range(si, bl_height):
+            for j in range(sj, bl_width):
+                for k in range(sk, channel_count):
                     # load bit planes from block
                     bps = self.get_all_bit_plane_from_block(f_blocks[i][j][k])
                     new_bps = np.copy(bps)
@@ -176,10 +191,12 @@ class StegoImageBPCS:
                             continue
                         message_bit_plane = message[inserted_message_count]
                         if not self.is_noise_like(message_bit_plane):
-                            print('conjugate')
+                            # print('conjugate')
                             message_bit_plane = self.conjugate(message_bit_plane)
-                            conjugate_pos_map.append((i, j, k, l))
-                        print(f'inserted in {(i, j, k, l)}')
+                            conjugate_flag.append(1)
+                        else:
+                            conjugate_flag.append(0)
+                        # print(f'inserted in {(i, j, k, l)}')
                         inserted_message_count += 1
                         # convert message to pbc system
                         message_bit_plane = self.cgc2pbc(message_bit_plane)
@@ -195,37 +212,86 @@ class StegoImageBPCS:
                         new_f_blocks[i][j][k] = self.all_bit_plane_to_block(new_bps)
                         # if all message inserted return
                         if inserted_message_count == message.shape[0]:
-                            return new_f_blocks, conjugate_pos_map
+                            return new_f_blocks, conjugate_flag
         # failed to insert all message
         raise Exception('Not enough noise-like region to store data')
 
-    def insert_data(self, data):
+    def insert_header_conj_map_to_bit_plane(self, f_blocks : np.ndarray,
+                                            header : np.ndarray, conj_map : np.ndarray):
+        bl_height, bl_width, channel_count, pl_height, pl_width = f_blocks.shape
+        new_f_blocks = np.copy(f_blocks)
+        joined = np.array(list(itertools.chain(iter(header), iter(conj_map))))
+        counter = 0
+        for i in range(bl_height):
+            for j in range(bl_width):
+                for k in range(channel_count):
+                    # load bit planes from block
+                    bps = self.get_all_bit_plane_from_block(new_f_blocks[i][j][k])
+                    # check bit planes
+                    for l, bp in enumerate(bps):
+                        # insert message to bit plane
+                        bps[l] = self.cgc2pbc(joined[counter])
+                        counter += 1
+                        # if all message inserted, break
+                        if counter == joined.shape[0]:
+                            break
+                    # insert bit planes to block
+                    new_f_blocks[i][j][k] = self.all_bit_plane_to_block(bps)
+                    # if all message inserted return
+                    if counter == joined.shape[0]:
+                        return new_f_blocks
+        raise Exception('Error happened when inserting header and conj map')
+
+    def insert_data(self, in_file_path : str, is_sequential : bool):
+        # open file
+        with open(in_file_path, 'rb') as f:
+            contents = f.read()
+        in_filename = os.path.split(in_file_path)[1]
+        # init
         image_data = np.array(self.image)
         image_data = self.pad_image(image_data)
         im_height, im_width, channel_count = image_data.shape
         # get image blocks
         blocks = self.image_data_to_blocks(image_data)
         f_blocks = self.flatten_blocks(blocks)
+        # pack message
+        message = MessagePacker.pack_message(in_filename, contents)
+        conjugate_map_len = math.ceil(len(message) / (PLANE_HEIGHT * PLANE_WIDTH))
+        message_len = len(message)
         # insert data to bit plane
-        new_f_blocks, conjugate_pos_map = self.insert_data_to_bit_plane(f_blocks, True, data)
-        print(conjugate_pos_map)
+        new_f_blocks, conjugate_flag = self.insert_data_to_bit_plane(f_blocks, is_sequential, message, conjugate_map_len)
+        # print(f'conjugate_flag = {conjugate_flag}')
+        # insert header and conjugate map to bit plane
+        header = MessagePacker.pack_header(conjugate_map_len, message_len)
+        conj_map = MessagePacker.pack_conj_map(conjugate_flag)
+        new_f_blocks = self.insert_header_conj_map_to_bit_plane(new_f_blocks, header, conj_map)
         # construct stego_image
         new_uf_blocks = self.unflatten_blocks(new_f_blocks)
         new_image_data = self.blocks_to_image_data(new_uf_blocks, image_data.shape)
         self.stego_image = Image.fromarray(new_image_data)
-        # self.stego_image.show()
 
-    def extract_data_from_bit_plane(self, f_blocks : np.ndarray):
+    def extract_data_from_bit_plane(self, f_blocks : np.ndarray, conjugate_map_len : int,
+                                    message_len : int, conjugate_flag : list):
         bl_height, bl_width, channel_count, pl_height, pl_width = f_blocks.shape
-        # read metadata
-        conjugate_pos_map = [(5, 46, 0, 4)]
-        # conjugate_pos_map = []
-        # insert message to noise-like region
+        # skip reserved header and conjugate map blocks
+        skip_counter = math.ceil((conjugate_map_len + 1) / 8)
+        for si in range(bl_height):
+            for sj in range(bl_width):
+                for sk in range(channel_count):
+                    if skip_counter == 0: break
+                    skip_counter -= 1
+                if skip_counter == 0: break
+            if skip_counter == 0: break
+        print(f'started at = {si, sj, sk}')
+        if skip_counter != 0:
+            raise Exception('Image ended when searching hidden message')
+        # extract message
         message = []
         extracted_message_count = 0
-        for i in range(bl_height):
-            for j in range(bl_width):
-                for k in range(channel_count):
+        conjugate_iter = iter(conjugate_flag)
+        for i in range(si, bl_height):
+            for j in range(sj, bl_width):
+                for k in range(sk, channel_count):
                     bps = self.get_all_bit_plane_from_block(f_blocks[i][j][k])
                     for l, bp in enumerate(bps):
                         # read candidate
@@ -234,19 +300,35 @@ class StegoImageBPCS:
                         if not self.is_noise_like(cand_message_bit_plane):
                             continue
                         # check if conjugate
-                        if (i, j, k, l) in conjugate_pos_map:
-                            print('conjugating')
+                        if next(conjugate_iter):
+                            # print('conjugate')
                             cand_message_bit_plane = self.conjugate(cand_message_bit_plane)
                         # store message bit plane
                         message.append(cand_message_bit_plane)
-                        print(f'extracted from {(i, j, k, l)}')
+                        # print(f'extracted from {(i, j, k, l)}')
                         extracted_message_count += 1
                         # if all message inserted return
-                        if extracted_message_count == 2:
-                            print(np.array(message))
+                        if extracted_message_count == message_len:
                             return MessagePacker.unpack_message(np.array(message))
         # failed to retrieve all message
         raise Exception('Image ended when searching hidden message')
+
+    def extract_header_conj_map_from_bit_plane(self, f_blocks : np.ndarray):
+        bl_height, bl_width, channel_count, pl_height, pl_width = f_blocks.shape
+        bps = self.get_all_bit_plane_from_block(f_blocks[0][0][0])
+        conjugate_map_len, message_len = MessagePacker.unpack_header(self.pbc2cgc(bps[0]))
+        # extract conj_map
+        conj_map = []
+        for i in range(bl_height):
+            for j in range(bl_width):
+                for k in range(channel_count):
+                    bps = self.get_all_bit_plane_from_block(f_blocks[i][j][k])
+                    bps_cgc = [self.pbc2cgc(bp) for bp in bps]
+                    conj_map.extend(bps_cgc)
+                    if len(conj_map) > conjugate_map_len + 1:
+                        conjugate_flag = MessagePacker.unpack_conj_map(np.array(conj_map[1:1+conjugate_map_len]))
+                        return conjugate_map_len, message_len, conjugate_flag
+        raise Exception('Error happened when extracting header and conj map')
 
     def extract_data(self):
         image_data = np.array(self.image)
@@ -255,9 +337,15 @@ class StegoImageBPCS:
         # get image blocks
         blocks = self.image_data_to_blocks(image_data)
         f_blocks = self.flatten_blocks(blocks)
+        # extract header and conj_map
+        temp = self.extract_header_conj_map_from_bit_plane(f_blocks)
+        conjugate_map_len, message_len, conjugate_flag = temp
+        # print(f'conjugate_flag = {conjugate_flag}')
         # extract data from bit plane
-        self.extracted_data = self.extract_data_from_bit_plane(f_blocks)
-        print(self.extracted_data)
+        extract_result = self.extract_data_from_bit_plane(f_blocks, conjugate_map_len, message_len, conjugate_flag)
+        self.extracted_filename, self.extracted_data = extract_result
+        print(self.extracted_filename)
+        # print(self.extracted_data)
 
     def save_stego_image(self, out_path):
         if self.stego_image is None:
@@ -267,7 +355,7 @@ class StegoImageBPCS:
     def save_extracted_data(self, out_path = None):
         if self.extracted_data is None:
             raise Exception('Extracted data not exists!')
-        out_path = out_path or 'defname.txt'
+        out_path = out_path or self.extracted_filename or 'default.txt'
         with open(out_path, 'wb') as f:
             f.write(self.extracted_data)
 
@@ -285,22 +373,70 @@ class MessagePacker:
         return padded_payload[:-pad_len]
 
     @staticmethod
-    def pack_message(payload : bytes):
+    def pack_header(conjugate_map_len : int, message_len : int):
+        assert conjugate_map_len < 2 ** 32
+        assert message_len < 2 ** 32
         block_size = PLANE_HEIGHT * PLANE_WIDTH
-        payload = MessagePacker.pad(payload)
+        bit_conjugate_map_len = bin(conjugate_map_len).lstrip('0b').rjust(32, '0')
+        bit_message_len = bin(message_len).lstrip('0b').rjust(32, '0')
+        bit_header = list(map(int, bit_conjugate_map_len + bit_message_len))
+        header = []
+        for i in range(0, len(bit_header), block_size):
+            temp = bit_header[i:i+block_size]
+            header.append([temp[j:j+PLANE_HEIGHT] for j in range(0, len(temp), PLANE_HEIGHT)])
+        return np.array(header)
+
+    @staticmethod
+    def unpack_header(header : np.ndarray):
+        bit_string = ''.join(list(map(str, np.append(header, np.array([], dtype=np.uint8)))))
+        conjugate_map_len = int(bit_string[:32], 2)
+        message_len = int(bit_string[32:], 2)
+        return conjugate_map_len, message_len
+
+    @staticmethod
+    def pack_conj_map(conjugate_flag : list):
+        block_size = PLANE_HEIGHT * PLANE_WIDTH
+        *lcf, = conjugate_flag
+        if len(lcf) % block_size != 0:
+            lcf.extend([0 for i in range(block_size - len(lcf) % block_size)])
+        conj_map = []
+        for i in range(0, len(lcf), block_size):
+            temp = lcf[i:i+block_size]
+            conj_map.append([temp[j:j+PLANE_HEIGHT] for j in range(0, len(temp), PLANE_HEIGHT)])
+        return np.array(conj_map)
+
+    @staticmethod
+    def unpack_conj_map(conj_map : np.ndarray):
+        return np.append(conj_map, np.array([], dtype=np.uint8)).tolist()
+
+    @staticmethod
+    def pack_message(filename : str, contents : bytes):
+        assert len(filename) < 256
+        block_size = PLANE_HEIGHT * PLANE_WIDTH
+        filename_len = len(filename).to_bytes(1, byteorder='big')
+        filename = filename.encode('latin-1')
+        payload = MessagePacker.pad(filename_len + filename + contents)
         bit_payload = list(map(int, ''.join([bin(i).lstrip('0b').rjust(8,'0') for i in payload])))
+        # pack message
         message = []
         for i in range(0, len(bit_payload), block_size):
             temp = bit_payload[i:i+block_size]
             message.append([temp[j:j+PLANE_HEIGHT] for j in range(0, len(temp), PLANE_HEIGHT)])
         return np.array(message)
 
+        i2b = lambda x, n: x.to_bytes(n, byteorder='big')
+        b2i = lambda x: int.from_bytes(x, byteorder='big')
+
     @staticmethod
     def unpack_message(message : np.ndarray):
         bit_string = ''.join(list(map(str, np.append(message, np.array([], dtype=np.uint8)))))
         payload = int(bit_string, 2).to_bytes(len(message) * 8, byteorder='big')
         payload = MessagePacker.unpad(payload)
-        return payload
+        # parse filename and contents
+        filename_len = int.from_bytes(payload[0:1], byteorder='big')
+        filename = payload[1:1+filename_len].decode('latin-1')
+        contents = payload[1+filename_len:]
+        return filename, contents
 
 
 if __name__ == '__main__':
@@ -308,7 +444,7 @@ if __name__ == '__main__':
 
     st = time.time()
     s = StegoImageBPCS('../example/raw.png')
-    s.insert_data(b'hehehehe')
+    s.insert_data('test.jpg', True)
     s.save_stego_image('out.png')
     del s
     ed = time.time()
@@ -318,5 +454,6 @@ if __name__ == '__main__':
     st = time.time()
     s2 = StegoImageBPCS('out.png')
     s2.extract_data()
+    s2.save_extracted_data('test_out.jpg')
     ed = time.time()
     print(f'time = {ed - st}')
