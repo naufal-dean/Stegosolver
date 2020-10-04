@@ -25,26 +25,13 @@ class StegoImageBPCS:
     def complexity(self, bit_plane : np.ndarray):
         color_change = 0
         for r in bit_plane:
-            color_change += sum([r[i] != r[i+1] for i in range(bit_plane.shape[1] - 1)])
+            color_change += sum([r[i] ^ r[i+1] for i in range(bit_plane.shape[1] - 1)])
         for c in bit_plane.transpose():
-            color_change += sum([c[i] != c[i+1] for i in range(bit_plane.shape[0] - 1)])
+            color_change += sum([c[i] ^ c[i+1] for i in range(bit_plane.shape[0] - 1)])
         return color_change / MAX_COLOR_CHANGE_ON_8_8_PLANE
 
     def is_noise_like(self, bit_plane : np.ndarray):
         return self.complexity(bit_plane) >= self.threshold
-
-    def identify_noise_like_region(self, f_blocks_bit_planes_cgc : np.ndarray):
-        # True if it is noise-like region
-        bl_height, bl_width, channel_count, bp_count, _, _ = f_blocks_bit_planes_cgc.shape
-        complexity_map_shape = (bl_height, bl_width, channel_count, bp_count)
-        complexity_map = np.empty(complexity_map_shape, dtype=bool)
-        for i in range(bl_height):
-            for j in range(bl_width):
-                for k in range(channel_count):
-                    for l in range(bp_count):
-                        is_noise_like = self.complexity(f_blocks_bit_planes_cgc[i][j][k][l]) >= self.threshold
-                        complexity_map[i][j][k][l] = is_noise_like
-        return complexity_map
 
     def pbc2cgc(self, bit_plane : np.ndarray):
         if bit_plane.shape[1] == 0:
@@ -63,26 +50,6 @@ class StegoImageBPCS:
         for i in range(bit_plane.shape[1] - 1):
             pbc_plane_t.append([b ^ g for b, g in zip(pbc_plane_t[-1], bit_plane[:,i+1])])
         return np.array(pbc_plane_t).transpose()
-
-    def f_blocks_bit_planes_to_cgc(self, f_blocks_bit_planes_pbc : np.ndarray):
-        bl_height, bl_width, channel_count, bp_count, pl_height, pl_width = f_blocks_bit_planes_pbc.shape
-        f_blocks_bit_planes_cgc = np.empty(f_blocks_bit_planes_pbc.shape, dtype=np.uint8)
-        for i in range(bl_height):
-            for j in range(bl_width):
-                for k in range(channel_count):
-                    for l in range(bp_count):
-                        f_blocks_bit_planes_cgc[i][j][k][l] = self.pbc2cgc(f_blocks_bit_planes_pbc[i][j][k][l])
-        return f_blocks_bit_planes_cgc
-
-    def f_blocks_bit_planes_to_pbc(self, f_blocks_bit_planes_cgc : np.ndarray):
-        bl_height, bl_width, channel_count, bp_count, pl_height, pl_width = f_blocks_bit_planes_cgc.shape
-        f_blocks_bit_planes_pbc = np.empty(f_blocks_bit_planes_cgc.shape, dtype=np.uint8)
-        for i in range(bl_height):
-            for j in range(bl_width):
-                for k in range(channel_count):
-                    for l in range(bp_count):
-                        f_blocks_bit_planes_pbc[i][j][k][l] = self.cgc2pbc(f_blocks_bit_planes_cgc[i][j][k][l])
-        return f_blocks_bit_planes_pbc
 
     def conjugate(self, bit_plane : np.ndarray):
         return bit_plane ^ self.wc_plane
@@ -259,12 +226,6 @@ class StegoImageBPCS:
         new_image_data = self.blocks_to_image_data(new_uf_blocks, image_data.shape)
         self.stego_image = Image.fromarray(new_image_data)
         # self.stego_image.show()
-        # self.test_reconstruct_img(f_blocks, image_data.shape, image_data)
-
-    def test_reconstruct_img(self, flattened_blocks, image_data_shape, init_image_data):
-        unflattened_blocks = self.unflatten_blocks(flattened_blocks)
-        new_image_data = self.blocks_to_image_data(unflattened_blocks, image_data_shape)
-        Image.fromarray(new_image_data).show()
 
     def extract_data_from_bit_plane(self, f_blocks_bit_planes_pbc : np.ndarray):
         bl_height, bl_width, channel_count, bp_count, pl_height, pl_width = f_blocks_bit_planes_pbc.shape
@@ -362,10 +323,19 @@ class MessagePacker:
 
 
 if __name__ == '__main__':
+    import time
+
+    st = time.time()
     s = StegoImageBPCS('../example/raw.png')
     s.insert_data(b'hehehehe')
     s.save_stego_image('out.png')
     del s
+    ed = time.time()
+    print(f'time = {ed - st}')
+    print()
 
+    st = time.time()
     s2 = StegoImageBPCS('out.png')
     s2.extract_data()
+    ed = time.time()
+    print(f'time = {ed - st}')
