@@ -4,14 +4,13 @@ from controller.image_controller import StegoImage
 from os.path import isfile,join
 
 import cv2
-import glob
 import math
 import numpy as np
 import os
 import subprocess
 
 class StegoVideo:
-    def __init__(self, mode, key, in_path, out_path, data_path, frame_seq, pixel_seq):
+    def __init__(self, mode, key, in_path, out_path, data_path, frame_seq, pixel_seq, is_enc):
         self.mode = mode
         self.key = key
         self.in_path = in_path
@@ -19,6 +18,7 @@ class StegoVideo:
         self.data_path = data_path
         self.frame_seq = frame_seq
         self.pixel_seq = pixel_seq
+        self.is_enc = is_enc
 
         self.TEMP_FOLDER = './temp'
         self.nframes = 0
@@ -76,7 +76,7 @@ class StegoVideo:
             temp += ord(self.key[i])
         return temp
     
-    def set_info(self, nframes, is_fr_seq):
+    def set_info(self, nframes, is_fr_seq, is_enc):
         fr1 = open('{}/0.png'.format(self.TEMP_FOLDER), 'rb')
         dat = list(fr1.read())
         fr1.close()
@@ -89,34 +89,41 @@ class StegoVideo:
         else:
             n.append(0)
         
+        if is_enc:
+            n.append(1)
+        else:
+            n.append(0)
+        
         a = open('{}/tmpin.txt'.format(self.TEMP_FOLDER), 'wb+')
         a.write(bytes(n))
         a.close()
 
         ihandler = StegoImage('{}/0.png'.format(self.TEMP_FOLDER))
-        ihandler.insert_data('{}/tmpin.txt'.format(self.TEMP_FOLDER), True, seed)
-        ihandler.image.save('{}/0.png'.format(self.TEMP_FOLDER))
+        ihandler.insert_data('{}/tmpin.txt'.format(self.TEMP_FOLDER), True, self.key)
+        ihandler.save_stego_image('{}/0.png'.format(self.TEMP_FOLDER))
     
     def get_info(self):
         seed = self.get_rand_seed()
         ihandler = StegoImage('{}/0.png'.format(self.TEMP_FOLDER))
-        fname = ihandler.extract_data('{}/tmpout.txt'.format(self.TEMP_FOLDER), seed)
+        ihandler.extract_data(self.key)
+        ihandler.save_extracted_data('{}/tmpout.txt'.format(self.TEMP_FOLDER))
 
         f = open('{}/tmpout.txt'.format(self.TEMP_FOLDER), 'rb+')
         content = f.read()
         f.close()
 
         nframes = int.from_bytes(bytes(content[:8]), byteorder='big')
-        is_fr_seq = content[-1]
-        return nframes, is_fr_seq
+        is_fr_seq = content[-2]
+        is_enc = content[-1]
+        return nframes, is_fr_seq, is_enc
 
     def hide_lsb(self, data):
-        size = math.ceil(len(data)/self.framesize)
+        size = math.ceil(len(data)/(self.framesize + 10))
         part_size = math.ceil(len(data)/size)
         data_arr = [data[i:i+part_size] for i in range(0, len(data), part_size)]
         seed = self.get_rand_seed()
 
-        self.set_info(len(data_arr), self.frame_seq)
+        self.set_info(len(data_arr), self.frame_seq, self.is_enc)
         print(self.get_info())
 
         if not self.frame_seq:
@@ -127,13 +134,15 @@ class StegoVideo:
             for fr in rand_arr:
                 tempdat = '{}/tempdat.txt'.format(self.TEMP_FOLDER)
                 a = open(tempdat, 'wb+')
-                a.write(data_arr[i])
+                a.write(data_arr[it])
                 a.close()
+
+                it += 1
 
                 frame_file = '{}/{}.png'.format(self.TEMP_FOLDER, fr)
                 imhandler = StegoImage(frame_file)
-                imhandler.insert_data(tempdat, self.pixel_seq, seed)
-                imhandler.image.save(frame_file)
+                imhandler.insert_data(tempdat, self.pixel_seq, self.key)
+                imhandler.save_stego_image(frame_file)
 
         else:
             for i in range(len(data_arr)):
@@ -144,15 +153,16 @@ class StegoVideo:
 
                 frame_file = '{}/{}.png'.format(self.TEMP_FOLDER, i+1)
                 imhandler = StegoImage(frame_file)
-                imhandler.insert_data(tempdat, self.pixel_seq, seed)
-                imhandler.image.save(frame_file)
+                imhandler.insert_data(tempdat, self.pixel_seq, self.key)
+                imhandler.save_stego_image(frame_file)
         
     def extract_lsb(self):
         seed = self.get_rand_seed()
         full_content = b''
-        nhideframes, is_fr_seq = self.get_info()
+        nhideframes, is_fr_seq, is_enc = self.get_info()
         print(self.get_info())
         self.frame_seq = is_fr_seq
+        self.is_enc = is_enc
 
         if not self.frame_seq:
             np.random.seed(seed)
@@ -163,7 +173,8 @@ class StegoVideo:
 
                 frame_file = '{}/{}.png'.format(self.TEMP_FOLDER, fr)
                 imhandler = StegoImage(frame_file)
-                fname = imhandler.extract_data(tempdat, seed)
+                imhandler.extract_data(self.key)
+                imhandler.save_extracted_data(tempdat)
 
                 a = open(tempdat, 'rb+')
                 content = a.read()
@@ -172,12 +183,13 @@ class StegoVideo:
                 full_content += content
 
         else:
-            for i in range(1, nhideframes):
+            for i in range(nhideframes):
                 tempdat = '{}/tempdat.txt'.format(self.TEMP_FOLDER)
 
-                frame_file = '{}/{}.png'.format(self.TEMP_FOLDER, i)
+                frame_file = '{}/{}.png'.format(self.TEMP_FOLDER, i+1)
                 imhandler = StegoImage(frame_file)
-                fname = imhandler.extract_data(tempdat, seed)
+                imhandler.extract_data(self.key)
+                imhandler.save_extracted_data(tempdat)
 
                 a = open(tempdat, 'rb+')
                 content = a.read()
@@ -210,9 +222,12 @@ class StegoVideo:
         self.framesize = width * height
 
     def hide(self):
-        f = open(self.data_path, 'rb')
-        data = f.read()
-        f.close()
+        if self.is_enc:
+            data = self.encrypt_data()
+        else:
+            f = open(self.data_path, 'rb')
+            data = f.read()
+            f.close()
 
         self.hide_lsb(data)
         self.ffmpeg_frames_to_video()
@@ -220,6 +235,9 @@ class StegoVideo:
 
     def extract(self):
         file = self.extract_lsb()
+
+        if self.is_enc:
+            file = self.decrypt_data(file)
 
         f = open(self.out_path, 'wb+')
         f.write(file)
@@ -240,8 +258,9 @@ if __name__ == '__main__':
     in_path = './video.avi'
     out_path = './b.txt'
     data_path = './a.txt'
-    frame_seq = True
-    pixel_seq = True
+    frame_seq = False
+    pixel_seq = False
+    is_enc = True
 
-    runner = StegoVideo(mode, key, in_path, out_path, data_path, frame_seq, pixel_seq)
+    runner = StegoVideo(mode, key, in_path, out_path, data_path, frame_seq, pixel_seq, is_enc)
     runner.run()
