@@ -9,7 +9,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-import util.image_psnr
+import util.image_psnr, util.audio_psnr
 from datetime import date
 from controller import StegoAudio, StegoImage, StegoImageBPCS, StegoVideo
 from controller.audio_controller import psnr
@@ -231,10 +231,10 @@ class MainWindow(QMainWindow):
 
     def audioHideFile(self):
         # tombol hide file
-        audio_path = self.audioTextEditH.toPlainText()
+        self.audio_path_input = self.audioTextEditH.toPlainText()
         file_path = self.fileTextEditH.toPlainText()
         key = self.keyTextEditH.toPlainText()
-        self.hideAudio = StegoAudio(key, audio_path)
+        self.hideAudio = StegoAudio(key, self.audio_path_input)
         self.stegoAudio.insert_data(file_path, self.ASeqCheck.isChecked())
         self.ASaveAudioH.show()
         self.APlayAudioH.show()
@@ -248,8 +248,12 @@ class MainWindow(QMainWindow):
         # print(file_path)
     
     def saveAudio(self):
-        audio_res = self.
-        self.stegoAudio.save_stego_audio()
+        fileName_audio, _ = QFileDialog.getSaveFileName(None, "Save Stego Audio", "", "All (*)")
+        self.stegoAudio.save_stego_audio(fileName_audio)
+        psnr = util.audio_psnr.psnr(self.audio_path_input, fileName_audio)
+        self.audioTextEditH.setText(str(psnr))
+        self.audioTextEditH.show()
+        
 
     # dialog window helper
     def dialogWindow(self, title, text, subtext="" , type="Information"):
