@@ -9,7 +9,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-import util.image_psnr
+import util.image_psnr, util.audio_psnr
 from datetime import date
 from controller import StegoAudio, StegoImage, StegoImageBPCS, StegoVideo
 from controller.audio_controller import psnr
@@ -51,7 +51,21 @@ class MainWindow(QMainWindow):
         self.imgMethUsedInpE.addItems(["LSB", "BPCS"])
         # audio menu
         self.AHidePageButton.clicked.connect(self.audioHide)
+        self.AExtractPageButton.clicked.connect(self.audioExtract)
+        self.AAudioBackPageButton.clicked.connect(self.mainMenu)
+        # audio hide
         self.AHideButton.clicked.connect(self.audioHideFile)
+        self.ABackToAudioButtonH.clicked.connect(self.audio)
+        self.ASaveAudioH.hide()
+        self.APlayAudioH.hide()
+        self.PSNRLabelRes.hide()
+        self.audioPathFileDialogH.clicked.connect(self.audioInputPathChanged)
+        self.filePathFileDialogH.clicked.connect(self.fileInputPathChanged)
+        # audio extract
+        self.AExtractButton.clicked.connect(self.audioExtractFile)
+        self.ASaveAudioE.hide()
+        self.APlayAudioE.hide()
+        
 
     def mainMenu(self):
         self.stackedWidget.setCurrentIndex(0)
@@ -233,23 +247,55 @@ class MainWindow(QMainWindow):
 
     # audio
     def audio(self):
+        # pindah ke page menu audio
         self.stackedWidget.setCurrentIndex(4)
+    
+    def audioExtract(self):
+        # pindah ke page extract
+        self.stackedWidget.setCurrentIndex(6)
+
+    def audioExtractFile(self):
+        # tombol extract file
+        self.audio_path_input = self.APathTextEditE.toPlainText()
+        key = self.AKeyTextEditE.toPlainText()
+        self.stegoAudio = StegoAudio(key, self.audio_path_input)
+        self.stegoAudio.extract_data()
+        self.ASaveAudioE.show()
+        self.APlayAudioE.show()
+        self.ASaveAudioE.clicked.connect(self.saveMessageFromAudio)
+        self.APlayAudioE.clicked.connect(self.playAudio)
+    
+    def saveMessageFromAudio(self):
 
     def audioHide(self):
+        # pindah ke page hide
         self.stackedWidget.setCurrentIndex(5)
-
+    
     def audioHideFile(self):
-        audio_path = self.audioTextEdit.toPlainText()
-        file_path = self.fileTextEdit.toPlainText()
-        key = self.keyTextEdit.toPlainText()
-        hide = StegoAudio(key, audio_path)
-        hide.insert_data(file_path, self.ASeqCheck.isChecked())
-        hide.save_stego_audio("example/lol.wav")
-        extractor = StegoAudio(key, "example/lol.wav")
-        extractor.extract_data()
-        extractor.save_extracted_file("example/lala.pdf")
-        psnr("example/test.wav", "example/lol.wav")
-        print(file_path)
+        # tombol hide file
+        self.audio_path_input = self.APathTextEditH.toPlainText()
+        file_path = self.AFileTextEditH.toPlainText()
+        key = self.AKeyTextEditH.toPlainText()
+        self.stegoAudio = StegoAudio(key, self.audio_path_input)
+        self.stegoAudio.insert_data(file_path, self.ASeqCheck.isChecked())
+        self.ASaveAudioH.show()
+        self.APlayAudioH.show()
+        self.ASaveAudioH.clicked.connect(self.saveAudio)
+        self.APlayAudioH.clicked.connect(self.playAudio)
+        # hide.save_stego_audio("example/lol.wav")
+        # extractor = StegoAudio(key, "example/lol.wav")
+        # extractor.extract_data()
+        # extractor.save_extracted_file("example/lala.pdf")
+        # psnr("example/test.wav", "example/lol.wav")
+        # print(file_path)
+    
+    def saveAudio(self):
+        fileName_audio, _ = QFileDialog.getSaveFileName(None, "Save Stego Audio", self.stegoAudio.audio_filename, "All (*)")
+        self.stegoAudio.save_stego_audio(fileName_audio)
+        psnr = util.audio_psnr.psnr(self.audio_path_input, fileName_audio)
+        self.ATextEditH.setText(str(psnr))
+        self.ATextEditH.show()
+        
 
     # dialog window helper
     def dialogWindow(self, title, text, subtext="" , type="Information"):
