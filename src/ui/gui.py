@@ -3,7 +3,7 @@ import os
 import sqlite3
 import time
 from PIL.ImageQt import ImageQt
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
 
 from PyQt5.uic import loadUi
 from PyQt5.Qt import QAbstractItemView
@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
         # audio extract
         self.AExtractButton.clicked.connect(self.audioExtractFile)
         self.ASaveMessage.hide()
-        # self.APlayAudioE.hide()
+        self.AErrMsg.hide()
         self.AFilePathFileDialogE.clicked.connect(self.selectAudioExtractInput)
 
         # video menu
@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
         self.VSaveVideoH.hide()
         self.VPlayVideoH.hide()
         self.VPathFileDialogH.clicked.connect(self.selectVideoInput)
-        self.VFilePathFileDialogH.clicked.connect(self.selectMessageInput)
+        self.VFilePathFileDialogH.clicked.connect(self.selectVideoMessageInput)
         # self.APathFileDialogH.clicked.connect(self.audioInputPathChanged)
         # self.AFilePathFileDialogH.clicked.connect(self.fileInputPathChanged)
         # audio extract
@@ -322,7 +322,6 @@ class MainWindow(QMainWindow):
             self.ASaveMessage.show()
             self.APlayAudioE.show()
             self.ASaveMessage.clicked.connect(self.saveMessageFromAudio)
-            self.APlayAudioE.clicked.connect(self.playAudio)
         except:
             self.AErrMsg.setText("audio path not exist")
             self.AErrMsg.show()
@@ -346,11 +345,9 @@ class MainWindow(QMainWindow):
             try:
                 self.stegoAudio = StegoAudio(key, self.audio_path_input)
                 self.APSNRLabelRes.hide()
-                self.stegoAudio.insert_data(file_path, self.ASeqCheck.isChecked(), key)
+                self.stegoAudio.insert_data(file_path, not self.ASeqCheck.isChecked(), key)
                 self.ASaveAudioH.show()
-                self.APlayAudioH.show()
                 self.ASaveAudioH.clicked.connect(self.saveAudio)
-                self.APlayAudioH.clicked.connect(self.playAudio)
             except:
                 self.APSNRLabelRes.setText("message/audio path not exist")
                 self.APSNRLabelRes.show()
@@ -362,10 +359,16 @@ class MainWindow(QMainWindow):
         self.APSNRLabelRes.setText(str(psnr))
         self.APSNRLabelRes.show()
         self.APSNRLabel.show()
+        self.APlayAudioH.show()
+        self.APlayAudioH.clicked.connect(self.playAudio)
 
     def playAudio(self):
         print("lala")
         url = QtCore.QUrl.fromLocalFile(self.stegoAudio.audio_filename)
+        content = QtMultimedia.QMediaContent(url)
+        player = QtMultimedia.QMediaPlayer()
+        player.setMedia(content)
+        player.play()
 
     def video(self):
         # pindah ke page menu video
@@ -381,7 +384,7 @@ class MainWindow(QMainWindow):
         if fileName:
             self.VPathTextEditE.setText(fileName)
 
-    def selectMessageInput(self):
+    def selectVideoMessageInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Message File", "", "All (*)")
         if fileName:
             self.VFileTextEditH.setText(fileName)
