@@ -38,6 +38,9 @@ class MainWindow(QMainWindow):
         self.backImagePageNavBtn.clicked.connect(self.image)
         self.imgRawPathInp.returnPressed.connect(self.imageInputPathChanged)
         self.imgRawPathBtn.clicked.connect(self.selectImageInput)
+        self.imgFileInpPathBtn.clicked.connect(self.imageSelectFileInput)
+        self.imgHideFileBtn.clicked.connect(self.imageExecHideFile)
+        self.imgSaveOutBtn.clicked.connect(self.saveStegoImage)
         # image extract
         self.backImagePageNavBtnE.clicked.connect(self.image)
         self.imgStegPathInpE.returnPressed.connect(self.imageInputPathChanged)
@@ -113,6 +116,35 @@ class MainWindow(QMainWindow):
         picLabel.setPixmap(pixmap)
         picLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.imgRawPathInp.setText(fileName)
+
+    # exec hide img
+    def imageSelectFileInput(self):
+        fileName, _ = QFileDialog.getOpenFileName(None, "Select File", "", "All (*)")
+        self.imgFileInpPathInp.setText(fileName)
+
+    def imageExecHideFile(self):
+        stegoImage = self.stegoImageLSB
+        in_filename = self.imgFileInpPathInp.text()
+        encryption = self.imgEncInp.isChecked()
+        is_sequential = not self.imgNonSeqInp.isChecked()
+        key = self.imgKeyInp.text()
+        stegoImage.insert_data(in_filename, is_sequential, key)
+        self.setImageOutput()
+
+    def setImageOutput(self):
+        stegoImage = self.stegoImageLSB
+        picLabel = self.imageStegoPicLabel
+        qim = ImageQt(self.stegoImageLSB.stego_image)
+        pixmap = QPixmap.fromImage(qim)
+        pixmap = pixmap.scaled(picLabel.width(), picLabel.height(), QtCore.Qt.KeepAspectRatio)
+        picLabel.setPixmap(pixmap)
+        picLabel.setAlignment(QtCore.Qt.AlignCenter)
+
+    # save steg image
+    def saveStegoImage(self):
+        stegoImage = self.stegoImageLSB
+        fileName, _ = QFileDialog.getSaveFileName(None, "Save Stego Image", "", "All (*)")
+        stegoImage.save_stego_image(fileName)
 
     # audio
     def audio(self):
