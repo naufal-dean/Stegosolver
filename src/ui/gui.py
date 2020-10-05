@@ -169,8 +169,11 @@ class MainWindow(QMainWindow):
         if (encryption or not is_sequential) and not key:
             self.dialogWindow("Invalid Action", "Please input key when using non sequential or encryption", subtext="", type="Warning")
             return
-        stegoImage.insert_data(in_filename, is_sequential, key)
-        self.setImageOutput(stegoImage)
+        try:
+            stegoImage.insert_data(in_filename, is_sequential, key)
+            self.setImageOutput(stegoImage)
+        except Exception as e:
+            self.dialogWindow("Error Happened", str(e), subtext="", type="Warning")
 
     def setImageOutput(self, stegoImage):
         picLabel = self.imageStegoPicLabel
@@ -189,8 +192,11 @@ class MainWindow(QMainWindow):
         if stegoImage.stego_image is None:
             self.dialogWindow("Invalid Action", "Please hide file first", subtext="", type="Warning")
             return
-        fileName, _ = QFileDialog.getSaveFileName(None, "Save Stego Image", "", "All (*)")
-        stegoImage.save_stego_image(fileName)
+        fileName, _ = QFileDialog.getSaveFileName(None, "Save Stego Image", "", "Image Files (*.png *.bmp)")
+        try:
+            stegoImage.save_stego_image(fileName)
+        except Exception as e:
+            self.dialogWindow("Invalid Filename Extension", "Cannot save image with name: " + fileName, subtext="Please use .png or .bmp extension", type="Warning")
 
     # IMAGE EXTRACT
     # exec extract file
