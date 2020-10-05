@@ -1030,19 +1030,6 @@
        <string>Audio path:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="APlayAudioE">
-      <property name="geometry">
-       <rect>
-        <x>690</x>
-        <y>380</y>
-        <width>171</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>PLAY AUDIO</string>
-      </property>
-     </widget>
      <widget class="QTextEdit" name="APathTextEditE">
       <property name="geometry">
        <rect>
@@ -1067,7 +1054,7 @@
       <property name="geometry">
        <rect>
         <x>690</x>
-        <y>430</y>
+        <y>380</y>
         <width>171</width>
         <height>41</height>
        </rect>

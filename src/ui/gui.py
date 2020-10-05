@@ -2,7 +2,8 @@ import os
 import sqlite3
 import time
 from PIL.ImageQt import ImageQt
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
+
 from PyQt5.uic import loadUi
 from PyQt5.Qt import QAbstractItemView
 from PyQt5.QtCore import *
@@ -329,7 +330,8 @@ class MainWindow(QMainWindow):
         self.APSNRLabel.show()
     
     def playAudio(self):
-        print("belom ada heheh")
+        print("lala")
+        url = QtCore.QUrl.fromLocalFile(self.stegoAudio.audio_filename)
 
     # dialog window helper
     def dialogWindow(self, title, text, subtext="" , type="Information"):
