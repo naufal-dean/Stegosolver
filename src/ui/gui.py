@@ -162,10 +162,12 @@ class MainWindow(QMainWindow):
             self.setImageOutput(stegoImage)
         except Exception as e:
             self.dialogWindow("Error Happened", str(e), subtext="", type="Warning")
+        else:
+            self.dialogWindow("Succeed Inserting Message", "To save the stego image, click 'Save Output'", subtext="", type="Information")
 
     def setImageOutput(self, stegoImage):
         picLabel = self.imageStegoPicLabel
-        qim = ImageQt(self.stegoImageLSB.stego_image)
+        qim = ImageQt(stegoImage.stego_image)
         pixmap = QPixmap.fromImage(qim)
         pixmap = pixmap.scaled(picLabel.width(), picLabel.height(), QtCore.Qt.KeepAspectRatio)
         picLabel.setPixmap(pixmap)
@@ -181,6 +183,9 @@ class MainWindow(QMainWindow):
             self.dialogWindow("Invalid Action", "Please hide file first", subtext="", type="Warning")
             return
         fileName, _ = QFileDialog.getSaveFileName(None, "Save Stego Image", "", "Image Files (*.png *.bmp)")
+        print(fileName)
+        if not fileName:
+            return
         try:
             stegoImage.save_stego_image(fileName)
         except Exception as e:
@@ -193,13 +198,20 @@ class MainWindow(QMainWindow):
         if stegoImage is None:
             self.dialogWindow("Invalid Action", "Please add stego image first", subtext="", type="Warning")
             return
+        encryption = self.imgEncInpE.isChecked()
         key = self.imgKeyInpE.text()
         if encryption and not key:
             self.dialogWindow("Invalid Action", "Please input key when using encryption", subtext="", type="Warning")
             return
         if not key:
             key = '1337'  # default non sequential extract key
-        stegoImage.extract_data(key)
+        print(key)
+        try:
+            stegoImage.extract_data(key)
+        except Exception as e:
+            self.dialogWindow("Error Happened", str(e), subtext="", type="Warning")
+        else:
+            self.dialogWindow("Succeed Extracting Message", "To save the message, click 'Save Output'", subtext="", type="Information")
 
     # save extracted file
     def imageSaveOutfile(self):
@@ -207,12 +219,17 @@ class MainWindow(QMainWindow):
         if stegoImage is None:
             self.dialogWindow("Invalid Action", "Please add stego image first", subtext="", type="Warning")
             return
-        if stegoImage.stego_image is None:
+        if stegoImage.extracted_data is None:
             self.dialogWindow("Invalid Action", "Please extract message first", subtext="", type="Warning")
             return
         defaultFilename = stegoImage.extracted_filename
         fileName, _ = QFileDialog.getSaveFileName(None, "Save Extracted File", defaultFilename, "All (*)")
-        stegoImage.save_extracted_data(fileName)
+        if not fileName:
+            return
+        try:
+            stegoImage.save_extracted_data(fileName)
+        except Exception as e:
+            self.dialogWindow("Error Happened", str(e), subtext="", type="Warning")
 
     # audio
     def audio(self):
