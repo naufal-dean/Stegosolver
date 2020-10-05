@@ -4,6 +4,8 @@ import numpy as np
 import os
 from PIL import Image
 
+import util.vigenere
+
 
 PLANE_HEIGHT = 8
 PLANE_WIDTH = 8
@@ -244,11 +246,15 @@ class StegoImageBPCS:
                         return new_f_blocks
         raise Exception('Error happened when inserting header and conj map')
 
-    def insert_data(self, in_file_path : str, is_sequential : bool, key : str = '1337'):
+    def insert_data(self, in_file_path : str, is_encrypted : bool,
+                    is_sequential : bool, key : str = '1337'):
         # open file
         with open(in_file_path, 'rb') as f:
             contents = f.read()
         in_filename = os.path.split(in_file_path)[1]
+        # encrypt file (optional)
+        if is_encrypted:
+            contents = vigenere.encrypt(key, contents)
         # init
         image_data = np.array(self.image)
         image_data = self.pad_image(image_data)
@@ -334,7 +340,7 @@ class StegoImageBPCS:
                         return conjugate_map_len, message_len, conjugate_flag
         raise Exception('Error happened when extracting header and conj map')
 
-    def extract_data(self, key : str = '1337'):
+    def extract_data(self, is_encrypted : bool, key : str = '1337'):
         image_data = np.array(self.image)
         image_data = self.pad_image(image_data)
         im_height, im_width, channel_count = image_data.shape
@@ -348,7 +354,10 @@ class StegoImageBPCS:
         # extract data from bit plane
         extract_result = self.extract_data_from_bit_plane(f_blocks, conjugate_map_len, message_len, conjugate_flag)
         self.extracted_filename, self.extracted_data = extract_result
-        print(self.extracted_filename)
+        # decrypt file (optional)
+        if is_encrypted:
+            self.extracted_data = vigenere.encrypt(key, self.extracted_data)
+        # print(self.extracted_filename)
         # print(self.extracted_data)
 
     def save_stego_image(self, out_path):

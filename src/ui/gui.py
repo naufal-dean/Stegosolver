@@ -171,7 +171,7 @@ class MainWindow(QMainWindow):
             self.dialogWindow("Invalid Action", "Please input key when using non sequential or encryption", subtext="", type="Warning")
             return
         try:
-            stegoImage.insert_data(in_filename, is_sequential, key)
+            stegoImage.insert_data(in_filename, encryption, is_sequential, key)
             self.setImageOutput(stegoImage)
         except Exception as e:
             self.dialogWindow("Error Happened", str(e), subtext="", type="Warning")
@@ -219,7 +219,7 @@ class MainWindow(QMainWindow):
             key = '1337'  # default non sequential extract key
         print(key)
         try:
-            stegoImage.extract_data(key)
+            stegoImage.extract_data(encryption, key)
         except Exception as e:
             self.dialogWindow("Error Happened", str(e), subtext="", type="Warning")
         else:
