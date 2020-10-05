@@ -13,7 +13,7 @@ class StegoAudio:
         # get audio frames
         self.audio_frames = bytearray(list(self.audio.readframes(self.audio.getnframes())))
 
-    def insert_data(self, file_path, is_sequential):
+    def insert_data(self, file_path, is_sequential, key = "1337"):
         # get file name & convert to list of bit
         self.filename = os.path.split(file_path)[1]
         # get file & convert file to list of bit
@@ -21,7 +21,7 @@ class StegoAudio:
             mem = mmap.mmap(f.fileno(), 0)
             self.data = bytearray(mem)
         self.audio_frames = LSBHelper.insert_data_as_lsb(self.audio_frames,
-                            is_sequential, self.filename, self.data)
+                            is_sequential, self.filename, self.data, key)
 
     def extract_data(self):
         

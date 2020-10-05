@@ -969,7 +969,7 @@
       <property name="geometry">
        <rect>
         <x>450</x>
-        <y>350</y>
+        <y>380</y>
         <width>171</width>
         <height>41</height>
        </rect>
@@ -995,7 +995,7 @@
       <property name="geometry">
        <rect>
         <x>450</x>
-        <y>400</y>
+        <y>430</y>
         <width>171</width>
         <height>41</height>
        </rect>
@@ -1034,7 +1034,7 @@
       <property name="geometry">
        <rect>
         <x>690</x>
-        <y>350</y>
+        <y>380</y>
         <width>171</width>
         <height>41</height>
        </rect>
@@ -1067,13 +1067,26 @@
       <property name="geometry">
        <rect>
         <x>690</x>
-        <y>400</y>
+        <y>430</y>
         <width>171</width>
         <height>41</height>
        </rect>
       </property>
       <property name="text">
        <string>SAVE MESSAGE</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="AErrMsg">
+      <property name="geometry">
+       <rect>
+        <x>460</x>
+        <y>320</y>
+        <width>201</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>BELUM ADA FILENYA</string>
       </property>
      </widget>
     </widget>
