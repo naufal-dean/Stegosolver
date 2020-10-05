@@ -1098,7 +1098,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="VPlayAudioE">
+     <widget class="QPushButton" name="VPlayVideoE">
       <property name="geometry">
        <rect>
         <x>700</x>
@@ -1163,7 +1163,7 @@
        <string>SAVE MESSAGE</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="VBackToAudioButtonE">
+     <widget class="QPushButton" name="VBackToVideoButtonE">
       <property name="geometry">
        <rect>
         <x>460</x>
@@ -1191,7 +1191,7 @@
      </widget>
     </widget>
     <widget class="QWidget" name="videHidePage">
-     <widget class="QPushButton" name="VSaveAudioH">
+     <widget class="QPushButton" name="VSaveVideoH">
       <property name="geometry">
        <rect>
         <x>700</x>
@@ -1266,7 +1266,7 @@
        <string>Key (if needed):</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="VBackToAudioButtonH">
+     <widget class="QPushButton" name="VBackToVideoButtonH">
       <property name="geometry">
        <rect>
         <x>460</x>
@@ -1341,10 +1341,10 @@
        </rect>
       </property>
       <property name="text">
-       <string>Audio path:</string>
+       <string>Video path:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="VPlayAudioH">
+     <widget class="QPushButton" name="VPlayVideoH">
       <property name="geometry">
        <rect>
         <x>700</x>

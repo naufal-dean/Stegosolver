@@ -58,12 +58,16 @@ class MainWindow(QMainWindow):
         self.ASaveAudioH.hide()
         self.APlayAudioH.hide()
         self.APSNRLabelRes.hide()
+        self.APSNRLabel.hide()
+        self.APathFileDialogH.clicked.connect(self.selectAudioInput)
+        self.AFilePathFileDialogH.clicked.connect(self.selectMessageInput)
         # self.APathFileDialogH.clicked.connect(self.audioInputPathChanged)
         # self.AFilePathFileDialogH.clicked.connect(self.fileInputPathChanged)
         # audio extract
         self.AExtractButton.clicked.connect(self.audioExtractFile)
         self.ASaveMessage.hide()
         self.APlayAudioE.hide()
+        self.AFilePathFileDialogE.clicked.connect(self.selectAudioExtractInput)
 
 
     def mainMenu(self):
@@ -247,6 +251,21 @@ class MainWindow(QMainWindow):
     def audio(self):
         # pindah ke page menu audio
         self.stackedWidget.setCurrentIndex(4)
+    
+    def selectAudioInput(self):
+        fileName, _ = QFileDialog.getOpenFileName(None, "Select Audio", "", "Audio Files (*.wav)")
+        if fileName:
+            self.APathTextEditH.setText(fileName)
+    
+    def selectAudioExtractInput(self):
+        fileName, _ = QFileDialog.getOpenFileName(None, "Select Audio", "", "Audio Files (*.wav)")
+        if fileName:
+            self.APathTextEditE.setText(fileName)
+    
+    def selectMessageInput(self):
+        fileName, _ = QFileDialog.getOpenFileName(None, "Select Message File", "", "All (*)")
+        if fileName:
+            self.AFileTextEditH.setText(fileName)
 
     def audioExtract(self):
         # pindah ke page extract
@@ -258,9 +277,9 @@ class MainWindow(QMainWindow):
         key = self.AKeyTextEditE.toPlainText()
         self.stegoAudio = StegoAudio(key, self.audio_path_input)
         self.stegoAudio.extract_data()
-        self.ASaveAudioE.show()
+        self.ASaveMessage.show()
         self.APlayAudioE.show()
-        self.ASaveAudioE.clicked.connect(self.saveMessageFromAudio)
+        self.ASaveMessage.clicked.connect(self.saveMessageFromAudio)
         self.APlayAudioE.clicked.connect(self.playAudio)
 
     def saveMessageFromAudio(self):
@@ -290,12 +309,15 @@ class MainWindow(QMainWindow):
         # print(file_path)
 
     def saveAudio(self):
-        fileName_audio, _ = QFileDialog.getSaveFileName(None, "Save Stego Audio", self.stegoAudio.audio_filename, "All (*)")
+        fileName_audio, _ = QFileDialog.getSaveFileName(None, "Save Stego Audio", self.stegoAudio.audio_filename, "Audio Files (*.wav)")
         self.stegoAudio.save_stego_audio(fileName_audio)
         psnr = util.audio_psnr.psnr(self.audio_path_input, fileName_audio)
-        self.ATextEditH.setText(str(psnr))
-        self.ATextEditH.show()
-
+        self.APSNRLabelRes.setText(str(psnr))
+        self.APSNRLabelRes.show()
+        self.APSNRLabel.show()
+    
+    def playAudio(self):
+        print("belom ada heheh")
 
     # dialog window helper
     def dialogWindow(self, title, text, subtext="" , type="Information"):
