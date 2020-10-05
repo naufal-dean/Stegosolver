@@ -2,7 +2,7 @@ import os
 import sqlite3
 import time
 from PIL.ImageQt import ImageQt
-from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from PyQt5.uic import loadUi
 from PyQt5.Qt import QAbstractItemView
@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         # main menu
         self.imageButton.clicked.connect(self.image)
         self.audioButton.clicked.connect(self.audio)
+        self.videoButton.clicked.connect(self.video)
         # image menu
         self.imageHideNavBtn.clicked.connect(self.imageHide)
         self.imageExtractNavBtn.clicked.connect(self.imageExtract)
@@ -62,12 +63,32 @@ class MainWindow(QMainWindow):
         self.APSNRLabel.hide()
         self.APathFileDialogH.clicked.connect(self.selectAudioInput)
         self.AFilePathFileDialogH.clicked.connect(self.selectMessageInput)
+        # self.APathFileDialogH.clicked.connect(self.audioInputPathChanged)
+        # self.AFilePathFileDialogH.clicked.connect(self.fileInputPathChanged)
         # audio extract
-        self.ABackToAudioButtonE.clicked.connect(self.audio)
         self.AExtractButton.clicked.connect(self.audioExtractFile)
         self.ASaveMessage.hide()
         self.AErrMsg.hide()
         self.AFilePathFileDialogE.clicked.connect(self.selectAudioExtractInput)
+        
+        # video menu
+        self.VHidePageButton.clicked.connect(self.videoHide)
+        self.VExtractPageButton.clicked.connect(self.videoExtract)
+        # self.VVideoBackPageButton.clicked.connect(self.mainMenu)
+        # video hide
+        self.VHideButtonH.clicked.connect(self.videoHideFile)
+        self.VBackToVideoButtonH.clicked.connect(self.video)
+        self.VSaveVideoH.hide()
+        self.VPlayVideoH.hide()
+        self.VPathFileDialogH.clicked.connect(self.selectVideoInput)
+        self.VFilePathFileDialogH.clicked.connect(self.selectMessageInput)
+        # self.APathFileDialogH.clicked.connect(self.audioInputPathChanged)
+        # self.AFilePathFileDialogH.clicked.connect(self.fileInputPathChanged)
+        # audio extract
+        self.VExtractButton.clicked.connect(self.videoExtractFile)
+        self.VSaveMessage.hide()
+        self.VPlayVideoE.hide()
+        self.VFilePathFileDialogE.clicked.connect(self.selectVideoExtractInput)
 
 
     def mainMenu(self):
@@ -91,7 +112,6 @@ class MainWindow(QMainWindow):
             self.imageInpPicLabelE.clear()
             # path input
             self.imgStegPathInpE.clear()
-            self.imgFileOutPathInpE.clear()
             # key and others
             self.imgKeyInpE.clear()
             self.imgEncInpE.setChecked(False)
@@ -256,17 +276,17 @@ class MainWindow(QMainWindow):
         self.APathTextEditH.setText("")
         self.AFileTextEditH.setText("")
         self.APathTextEditE.setText("")
-    
+
     def selectAudioInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Audio", "", "Audio Files (*.wav)")
         if fileName:
             self.APathTextEditH.setText(fileName)
-    
+
     def selectAudioExtractInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Audio", "", "Audio Files (*.wav)")
         if fileName:
             self.APathTextEditE.setText(fileName)
-    
+
     def selectMessageInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Message File", "", "All (*)")
         if fileName:
@@ -334,6 +354,69 @@ class MainWindow(QMainWindow):
         player = QtMultimedia.QMediaPlayer()
         player.setMedia(content)
         player.play()
+        
+    def video(self):
+        # pindah ke page menu video
+        self.stackedWidget.setCurrentIndex(9)
+    
+    def selectVideoInput(self):
+        fileName, _ = QFileDialog.getOpenFileName(None, "Select Video", "", "Video Files (*.avi)")
+        if fileName:
+            self.VPathTextEditH.setText(fileName)
+    
+    def selectVideoExtractInput(self):
+        fileName, _ = QFileDialog.getOpenFileName(None, "Select Video", "", "Video Files (*.avi)")
+        if fileName:
+            self.VPathTextEditE.setText(fileName)
+    
+    def selectMessageInput(self):
+        fileName, _ = QFileDialog.getOpenFileName(None, "Select Message File", "", "All (*)")
+        if fileName:
+            self.VFileTextEditH.setText(fileName)
+
+    def videoExtract(self):
+        # pindah ke page extract
+        self.stackedWidget.setCurrentIndex(7)
+
+    def videoExtractFile(self):
+        # tombol extract file
+        self.video_path_input = self.VPathTextEditE.toPlainText()
+        key = self.VKeyTextEditE.toPlainText()
+        self.stegoVideo = StegoVideo(key, self.video_path_input)
+        self.stegoVideo.extract_data()
+        self.VSaveMessage.show()
+        self.VPlayVideoE.show()
+        self.VSaveMessage.clicked.connect(self.saveMessageFromVideo)
+        self.VPlayVideoE.clicked.connect(self.playVideo)
+
+    def saveMessageFromVideo(self):
+        fileName, _ = QFileDialog.getSaveFileName(None, "Save Message Stego Video", self.stegoVideo.filename, "All (*)")
+        self.stegoVideo.save_extracted_file(fileName)
+
+    def videoHide(self):
+        # pindah ke page hide
+        self.stackedWidget.setCurrentIndex(8)
+
+    def videoHideFile(self):
+        # tombol hide file
+        self.video_path_input = self.VPathTextEditH.toPlainText()
+        file_path = self.VFileTextEditH.toPlainText()
+        key = self.VKeyTextEditH.toPlainText()
+        fileName_video, _ = QFileDialog.getSaveFileName(None, "Save Stego Video", "", "Video (*avi)")
+        self.fileName_video = fileName_video
+        self.stegoVideo = StegoVideo('hide', key, self.video_path_input, fileName_video, file_path, self.VFrameSeqCheck.isChecked(), self.VPixelSeqCheck.isChecked(), self.VEnkripsiCheck.isChecked())
+        self.stegoVideo.run()
+        self.VPlayVideoH.show()
+        self.VPlayVideoH.clicked.connect(self.playVideo)
+        # hide.save_stego_audio("example/lol.wav")
+        # extractor = StegoAudio(key, "example/lol.wav")
+        # extractor.extract_data()
+        # extractor.save_extracted_file("example/lala.pdf")
+        # psnr("example/test.wav", "example/lol.wav")
+        # print(file_path)
+    
+    def playVideo(self):
+        self.stegoVideo.ffmpeg_playvideo(self.fileName_video)
 
     # dialog window helper
     def dialogWindow(self, title, text, subtext="" , type="Information"):
