@@ -41,12 +41,14 @@ class MainWindow(QMainWindow):
         self.imgFileInpPathBtn.clicked.connect(self.imageSelectFileInput)
         self.imgHideFileBtn.clicked.connect(self.imageExecHideFile)
         self.imgSaveOutBtn.clicked.connect(self.saveStegoImage)
+        self.imgMethUsedInp.addItems(["LSB", "BPCS"])
         # image extract
         self.backImagePageNavBtnE.clicked.connect(self.image)
         self.imgStegPathInpE.returnPressed.connect(self.imageInputPathChanged)
         self.imgStegPathBtnE.clicked.connect(self.selectImageInput)
         self.imgExtractButton.clicked.connect(self.imageExecExtractFile)
         self.imgSaveOutButtonE.clicked.connect(self.imageSaveOutfile)
+        self.imgMethUsedInpE.addItems(["LSB", "BPCS"])
         # audio menu
         self.AHidePageButton.clicked.connect(self.audioHide)
         self.AHideButton.clicked.connect(self.audioHideFile)
@@ -87,6 +89,22 @@ class MainWindow(QMainWindow):
     def imageExtract(self):
         self.stackedWidget.setCurrentIndex(3)
 
+    # IMAGE HELPER
+    def getStegoImage(self):
+        if self.stackedWidget.currentIndex() == 2:
+            print(self.imgMethUsedInp.currentText())
+            if self.imgMethUsedInp.currentText() == "LSB":
+                return self.stegoImageLSB
+            elif self.imgMethUsedInp.currentText() == "BPCS":
+                return self.stegoImageBPCS
+        elif self.stackedWidget.currentIndex() == 3:
+            print(self.imgMethUsedInpE.currentText())
+            if self.imgMethUsedInpE.currentText() == "LSB":
+                return self.stegoImageLSB
+            elif self.imgMethUsedInpE.currentText() == "BPCS":
+                return self.stegoImageBPCS
+        return None
+
     # IMAGE HIDE
     # image input
     def selectImageInput(self):
@@ -108,8 +126,10 @@ class MainWindow(QMainWindow):
         self.stegoImageBPCS = StegoImageBPCS(fileName)
         if self.stackedWidget.currentIndex() == 2:
             picLabel = self.imageRawPicLabel
+            pathInp = self.imgRawPathInp
         elif self.stackedWidget.currentIndex() == 3:
             picLabel = self.imageInpPicLabelE
+            pathInp = self.imgStegPathInpE
         else:
             print('Error occured')
             return
@@ -118,7 +138,7 @@ class MainWindow(QMainWindow):
         pixmap = pixmap.scaled(picLabel.width(), picLabel.height(), QtCore.Qt.KeepAspectRatio)
         picLabel.setPixmap(pixmap)
         picLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.imgRawPathInp.setText(fileName)
+        pathInp.setText(fileName)
 
     # exec hide img
     def imageSelectFileInput(self):
@@ -126,16 +146,21 @@ class MainWindow(QMainWindow):
         self.imgFileInpPathInp.setText(fileName)
 
     def imageExecHideFile(self):
-        stegoImage = self.stegoImageLSB
+        stegoImage = self.getStegoImage()
+        if stegoImage is None:
+            self.dialogWindow("Invalid Action", "Please add raw image first", subtext="", type="Warning")
+            return
         in_filename = self.imgFileInpPathInp.text()
         encryption = self.imgEncInp.isChecked()
         is_sequential = not self.imgNonSeqInp.isChecked()
         key = self.imgKeyInp.text()
+        if (encryption or not is_sequential) and not key:
+            self.dialogWindow("Invalid Action", "Please input key when using non sequential or encryption", subtext="", type="Warning")
+            return
         stegoImage.insert_data(in_filename, is_sequential, key)
-        self.setImageOutput()
+        self.setImageOutput(stegoImage)
 
-    def setImageOutput(self):
-        stegoImage = self.stegoImageLSB
+    def setImageOutput(self, stegoImage):
         picLabel = self.imageStegoPicLabel
         qim = ImageQt(self.stegoImageLSB.stego_image)
         pixmap = QPixmap.fromImage(qim)
@@ -145,20 +170,40 @@ class MainWindow(QMainWindow):
 
     # save steg image
     def saveStegoImage(self):
-        stegoImage = self.stegoImageLSB
+        stegoImage = self.getStegoImage()
+        if stegoImage is None:
+            self.dialogWindow("Invalid Action", "Please add raw image first", subtext="", type="Warning")
+            return
+        if stegoImage.stego_image is None:
+            self.dialogWindow("Invalid Action", "Please hide file first", subtext="", type="Warning")
+            return
         fileName, _ = QFileDialog.getSaveFileName(None, "Save Stego Image", "", "All (*)")
         stegoImage.save_stego_image(fileName)
 
     # IMAGE EXTRACT
     # exec extract file
     def imageExecExtractFile(self):
-        stegoImage = self.stegoImageLSB
+        stegoImage = self.getStegoImage()
+        if stegoImage is None:
+            self.dialogWindow("Invalid Action", "Please add stego image first", subtext="", type="Warning")
+            return
         key = self.imgKeyInpE.text()
+        if encryption and not key:
+            self.dialogWindow("Invalid Action", "Please input key when using encryption", subtext="", type="Warning")
+            return
+        if not key:
+            key = '1337'  # default non sequential extract key
         stegoImage.extract_data(key)
 
     # save extracted file
     def imageSaveOutfile(self):
-        stegoImage = self.stegoImageLSB
+        stegoImage = self.getStegoImage()
+        if stegoImage is None:
+            self.dialogWindow("Invalid Action", "Please add stego image first", subtext="", type="Warning")
+            return
+        if stegoImage.stego_image is None:
+            self.dialogWindow("Invalid Action", "Please extract message first", subtext="", type="Warning")
+            return
         defaultFilename = stegoImage.extracted_filename
         fileName, _ = QFileDialog.getSaveFileName(None, "Save Extracted File", defaultFilename, "All (*)")
         stegoImage.save_extracted_data(fileName)
