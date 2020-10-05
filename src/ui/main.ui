@@ -777,7 +777,7 @@
        <string>Message path:</string>
       </property>
      </widget>
-     <widget class="QTextEdit" name="ATextEditH">
+     <widget class="QTextEdit" name="APathTextEditH">
       <property name="geometry">
        <rect>
         <x>460</x>
@@ -1217,7 +1217,7 @@
        <string>HIDE</string>
       </property>
      </widget>
-     <widget class="QTextEdit" name="VTextEditH">
+     <widget class="QTextEdit" name="VPathTextEditH">
       <property name="geometry">
        <rect>
         <x>460</x>
