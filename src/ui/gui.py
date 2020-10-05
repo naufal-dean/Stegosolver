@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
         self.AExtractButton.clicked.connect(self.audioExtractFile)
         self.ASaveMessage.hide()
         self.APlayAudioE.hide()
-        
+
 
     def mainMenu(self):
         self.stackedWidget.setCurrentIndex(0)
@@ -196,7 +196,6 @@ class MainWindow(QMainWindow):
             self.dialogWindow("Invalid Action", "Please hide file first", subtext="", type="Warning")
             return
         fileName, _ = QFileDialog.getSaveFileName(None, "Save Stego Image", "", "Image Files (*.png *.bmp)")
-        print(fileName)
         if not fileName:
             return
         try:
@@ -248,7 +247,7 @@ class MainWindow(QMainWindow):
     def audio(self):
         # pindah ke page menu audio
         self.stackedWidget.setCurrentIndex(4)
-    
+
     def audioExtract(self):
         # pindah ke page extract
         self.stackedWidget.setCurrentIndex(6)
@@ -263,7 +262,7 @@ class MainWindow(QMainWindow):
         self.APlayAudioE.show()
         self.ASaveAudioE.clicked.connect(self.saveMessageFromAudio)
         self.APlayAudioE.clicked.connect(self.playAudio)
-    
+
     def saveMessageFromAudio(self):
         fileName, _ = QFileDialog.getSaveFileName(None, "Save Message Stego Audio", self.stegoAudio.filename, "All (*)")
         self.stegoAudio.save_extracted_file(fileName)
@@ -271,7 +270,7 @@ class MainWindow(QMainWindow):
     def audioHide(self):
         # pindah ke page hide
         self.stackedWidget.setCurrentIndex(5)
-    
+
     def audioHideFile(self):
         # tombol hide file
         self.audio_path_input = self.APathTextEditH.toPlainText()
@@ -289,14 +288,14 @@ class MainWindow(QMainWindow):
         # extractor.save_extracted_file("example/lala.pdf")
         # psnr("example/test.wav", "example/lol.wav")
         # print(file_path)
-    
+
     def saveAudio(self):
         fileName_audio, _ = QFileDialog.getSaveFileName(None, "Save Stego Audio", self.stegoAudio.audio_filename, "All (*)")
         self.stegoAudio.save_stego_audio(fileName_audio)
         psnr = util.audio_psnr.psnr(self.audio_path_input, fileName_audio)
         self.ATextEditH.setText(str(psnr))
         self.ATextEditH.show()
-        
+
 
     # dialog window helper
     def dialogWindow(self, title, text, subtext="" , type="Information"):
