@@ -18,9 +18,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>20</y>
+      <y>0</y>
       <width>1121</width>
-      <height>681</height>
+      <height>701</height>
      </rect>
     </property>
     <widget class="QWidget" name="start_page">
@@ -62,6 +62,341 @@
       <property name="text">
        <string>StegoVideo</string>
       </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="imagePage">
+     <widget class="QPushButton" name="imageExtractNavBtn">
+      <property name="geometry">
+       <rect>
+        <x>560</x>
+        <y>280</y>
+        <width>151</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Extract Message</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="imagePageTitle">
+      <property name="geometry">
+       <rect>
+        <x>440</x>
+        <y>20</y>
+        <width>231</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI Semibold</family>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Image Steganography</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::AutoText</enum>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="imageHideNavBtn">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>280</y>
+        <width>151</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Hide Message</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="imageHidePage">
+     <widget class="QGroupBox" name="imageStegoGroup">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>70</y>
+        <width>471</width>
+        <height>431</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Raw Image</string>
+      </property>
+      <widget class="QLabel" name="imageStegoPicLabel">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>451</width>
+         <height>401</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="imageHideTitle">
+      <property name="geometry">
+       <rect>
+        <x>440</x>
+        <y>20</y>
+        <width>231</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI Semibold</family>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Image Hide</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::AutoText</enum>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="imageRawGroup">
+      <property name="geometry">
+       <rect>
+        <x>590</x>
+        <y>70</y>
+        <width>471</width>
+        <height>431</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Stego Image</string>
+      </property>
+      <widget class="QLabel" name="imageRawPicLabel">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>451</width>
+         <height>401</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="imageMenuGroup">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>510</y>
+        <width>1001</width>
+        <height>131</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Menu</string>
+      </property>
+      <widget class="QPushButton" name="backImagePageNavBtn">
+       <property name="geometry">
+        <rect>
+         <x>810</x>
+         <y>70</y>
+         <width>181</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Back to Image Stegano Menu</string>
+       </property>
+      </widget>
+      <widget class="QWidget" name="formLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>491</width>
+         <height>101</height>
+        </rect>
+       </property>
+       <layout class="QFormLayout" name="imageLeftForm">
+        <item row="0" column="0">
+         <widget class="QLabel" name="imgRawPathLbl">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Raw Image Path</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <layout class="QGridLayout" name="imgRawPathGrid">
+          <item row="0" column="1">
+           <widget class="QToolButton" name="imgRawPathBtn">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLineEdit" name="imgRawPathInp">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="fileInpPathLbl">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>File Input Path</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="imgMethUsedLbl">
+          <property name="text">
+           <string>Method Used</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="imgMethUsedInp"/>
+        </item>
+        <item row="1" column="1">
+         <layout class="QGridLayout" name="fileInpPathGrid">
+          <item row="0" column="1">
+           <widget class="QToolButton" name="fileInpPathBtn">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLineEdit" name="fileInpPathInp">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QPushButton" name="imgHideBtn">
+       <property name="geometry">
+        <rect>
+         <x>810</x>
+         <y>20</y>
+         <width>181</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hide File to Image</string>
+       </property>
+      </widget>
+      <widget class="QWidget" name="formLayoutWidget_3">
+       <property name="geometry">
+        <rect>
+         <x>510</x>
+         <y>20</y>
+         <width>291</width>
+         <height>101</height>
+        </rect>
+       </property>
+       <layout class="QFormLayout" name="imageRightForm">
+        <item row="0" column="0">
+         <widget class="QLabel" name="imgKeyLbl">
+          <property name="text">
+           <string>Key (If Needed)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="imgKeyInp"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="imgEncLbl">
+          <property name="text">
+           <string>Encryption</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QCheckBox" name="imgEncInp">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="imgNonSeqLbl">
+          <property name="text">
+           <string>Non Sequential</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QCheckBox" name="imgNonSeqInp">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="audioPage">
