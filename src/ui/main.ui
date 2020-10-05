@@ -24,60 +24,85 @@
      </rect>
     </property>
     <widget class="QWidget" name="start_page">
-     <widget class="QPushButton" name="imageButton">
+     <widget class="QLabel" name="mainTitle">
       <property name="geometry">
        <rect>
-        <x>350</x>
-        <y>60</y>
-        <width>161</width>
-        <height>61</height>
+        <x>440</x>
+        <y>20</y>
+        <width>231</width>
+        <height>41</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI Semibold</family>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
       <property name="text">
-       <string>StegoImage</string>
+       <string>Steganography Tools</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::AutoText</enum>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QPushButton" name="audioButton">
+     <widget class="QGroupBox" name="mainMenuGroup">
       <property name="geometry">
        <rect>
-        <x>350</x>
-        <y>120</y>
-        <width>161</width>
-        <height>61</height>
+        <x>410</x>
+        <y>160</y>
+        <width>291</width>
+        <height>331</height>
        </rect>
       </property>
-      <property name="text">
-       <string>StegoAudio</string>
+      <property name="title">
+       <string>Main Menu</string>
       </property>
-     </widget>
-     <widget class="QPushButton" name="videoButton">
-      <property name="geometry">
-       <rect>
-        <x>350</x>
-        <y>180</y>
-        <width>161</width>
-        <height>61</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>StegoVideo</string>
-      </property>
+      <widget class="QPushButton" name="videoButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>230</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>StegoVideo</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="audioButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>130</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>StegoAudio</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="imageButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>30</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>StegoImage</string>
+       </property>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="imagePage">
-     <widget class="QPushButton" name="imageExtractNavBtn">
-      <property name="geometry">
-       <rect>
-        <x>560</x>
-        <y>280</y>
-        <width>151</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Extract Message</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="imagePageTitle">
       <property name="geometry">
        <rect>
@@ -103,18 +128,57 @@
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QPushButton" name="imageHideNavBtn">
+     <widget class="QGroupBox" name="imageMenuGroup_2">
       <property name="geometry">
        <rect>
-        <x>390</x>
-        <y>280</y>
-        <width>151</width>
-        <height>81</height>
+        <x>410</x>
+        <y>160</y>
+        <width>291</width>
+        <height>331</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Hide Message</string>
+      <property name="title">
+       <string>Image Steganography Menu</string>
       </property>
+      <widget class="QPushButton" name="imageBackMainMenuNavBtn">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>230</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Back to Main Menu</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="imageExtractNavBtn">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>130</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Extract Message</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="imageHideNavBtn">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>30</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hide Message</string>
+       </property>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="imageHidePage">
