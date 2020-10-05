@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import time
+import subprocess
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
 
@@ -349,11 +350,14 @@ class MainWindow(QMainWindow):
     
     def playAudio(self):
         print("lala")
-        url = QtCore.QUrl.fromLocalFile(self.fileName_audio_save)
-        content = QtMultimedia.QMediaContent(url)
-        player = QtMultimedia.QMediaPlayer()
-        player.setMedia(content)
-        player.play()
+        subprocess.call(["ffplay", self.fileName_audio_save], stdout=open(os.devnull, "w"), stderr=subprocess.STDOUT)
+
+        # url = QtCore.QUrl.fromLocalFile(self.fileName_audio_save)
+        # content = QtMultimedia.QMediaContent(url)
+        # player = QtMultimedia.QMediaPlayer()
+        # player.setMedia(content)
+        # player.setVolume(50.0)
+        # player.play()
 
     def video(self):
         # pindah ke page menu video

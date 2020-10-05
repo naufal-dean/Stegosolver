@@ -975,7 +975,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>BELUM ADA FILENYA TOLOL</string>
+       <string>BELUM ADA FILENYA</string>
       </property>
      </widget>
     </widget>
@@ -1343,7 +1343,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>BELUM ADA FILENYA TOLOL</string>
+       <string>BELUM ADA FILENYA</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="VFrameSeqCheck">
