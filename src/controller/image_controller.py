@@ -2,7 +2,7 @@ import os
 import numpy as np
 from PIL import Image
 
-import util.vigenere
+from util import vigenere
 from util.lsb_helper import LSBHelper, i2b, b2i
 
 
@@ -44,7 +44,7 @@ class StegoImage:
         self.extracted_filename, self.extracted_data = extract_result
         # decrypt file (optional)
         if is_encrypted:
-            self.extracted_filename = vigenere.decrypt(key, self.extracted_filename)
+            self.extracted_data = vigenere.decrypt(key, self.extracted_data)
 
     def save_stego_image(self, out_path):
         if self.stego_image is None:

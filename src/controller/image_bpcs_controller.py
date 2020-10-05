@@ -4,7 +4,7 @@ import numpy as np
 import os
 from PIL import Image
 
-import util.vigenere
+from util import vigenere
 
 
 PLANE_HEIGHT = 8
@@ -356,7 +356,7 @@ class StegoImageBPCS:
         self.extracted_filename, self.extracted_data = extract_result
         # decrypt file (optional)
         if is_encrypted:
-            self.extracted_data = vigenere.encrypt(key, self.extracted_data)
+            self.extracted_data = vigenere.decrypt(key, self.extracted_data)
         # print(self.extracted_filename)
         # print(self.extracted_data)
 
