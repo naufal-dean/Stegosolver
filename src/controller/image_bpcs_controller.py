@@ -244,7 +244,7 @@ class StegoImageBPCS:
                         return new_f_blocks
         raise Exception('Error happened when inserting header and conj map')
 
-    def insert_data(self, in_file_path : str, is_sequential : bool):
+    def insert_data(self, in_file_path : str, is_sequential : bool, key : str = '1337'):
         # open file
         with open(in_file_path, 'rb') as f:
             contents = f.read()
@@ -334,7 +334,7 @@ class StegoImageBPCS:
                         return conjugate_map_len, message_len, conjugate_flag
         raise Exception('Error happened when extracting header and conj map')
 
-    def extract_data(self):
+    def extract_data(self, key : str = '1337'):
         image_data = np.array(self.image)
         image_data = self.pad_image(image_data)
         im_height, im_width, channel_count = image_data.shape
