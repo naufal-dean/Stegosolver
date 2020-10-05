@@ -171,6 +171,8 @@ class StegoImageBPCS:
                     skip_counter -= 1
                 if skip_counter == 0: break
             if skip_counter == 0: break
+        sj += 1
+        sk = 0
         print(f'started at = {si, sj, sk}')
         if skip_counter != 0:
             raise Exception('Not enough noise-like region to store data')
@@ -282,6 +284,8 @@ class StegoImageBPCS:
                     skip_counter -= 1
                 if skip_counter == 0: break
             if skip_counter == 0: break
+        sj += 1
+        sk = 0
         print(f'started at = {si, sj, sk}')
         if skip_counter != 0:
             raise Exception('Image ended when searching hidden message')
