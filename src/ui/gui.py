@@ -9,8 +9,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import util.image_psnr
 from datetime import date
-from controller import StegoImage, StegoAudio
+from controller import StegoAudio, StegoImage, StegoImageBPCS, StegoVideo
 from controller.audio_controller import psnr
 
 
@@ -19,6 +20,10 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         loadUi(os.getcwd() + '/ui/main.ui', self)
         self.setupUI()
+        self.stegoAudio = None
+        self.stegoImageLSB = None
+        self.stegoImageBPCS = None
+        self.stegoVideo = None
 
     def setupUI(self):
         self.stackedWidget.setCurrentIndex(0)
@@ -35,6 +40,8 @@ class MainWindow(QMainWindow):
         self.imgRawPathBtn.clicked.connect(self.selectImageInput)
         # image extract
         self.backImagePageNavBtnE.clicked.connect(self.image)
+        self.imgStegPathInpE.returnPressed.connect(self.imageInputPathChanged)
+        self.imgStegPathBtnE.clicked.connect(self.selectImageInput)
         # audio menu
         self.AHidePageButton.clicked.connect(self.audioHide)
         self.AHideButton.clicked.connect(self.audioHideFile)
@@ -44,6 +51,29 @@ class MainWindow(QMainWindow):
 
     # image
     def image(self):
+        if self.stackedWidget.currentIndex() == 2:
+            # image
+            self.imageRawPicLabel.clear()
+            self.imageStegoPicLabel.clear()
+            # path input
+            self.imgRawPathInp.clear()
+            self.imgFileInpPathInp.clear()
+            # key and others
+            self.imgKeyInp.clear()
+            self.imgEncInp.setChecked(False)
+            self.imgNonSeqInp.setChecked(False)
+        elif self.stackedWidget.currentIndex() == 3:
+            # image
+            self.imageInpPicLabelE.clear()
+            # path input
+            self.imgStegPathInpE.clear()
+            self.imgFileOutPathInpE.clear()
+            # key and others
+            self.imgKeyInpE.clear()
+            self.imgEncInpE.setChecked(False)
+        # delete image controller
+        self.stegoImageLSB = None
+        self.stegoImageBPCS = None
         self.stackedWidget.setCurrentIndex(1)
 
     def imageHide(self):
@@ -68,12 +98,20 @@ class MainWindow(QMainWindow):
             self.dialogWindow("Open File", self.imgRawPathInp.text(), subtext="File is not an image!", type="Warning")
 
     def setImageInput(self, fileName):
-        self.stegoImage = StegoImage(fileName)
-        qim = ImageQt(self.stegoImage.image)
+        self.stegoImageLSB = StegoImage(fileName)
+        self.stegoImageBPCS = StegoImageBPCS(fileName)
+        if self.stackedWidget.currentIndex() == 2:
+            picLabel = self.imageRawPicLabel
+        elif self.stackedWidget.currentIndex() == 3:
+            picLabel = self.imageInpPicLabelE
+        else:
+            print('Error occured')
+            return
+        qim = ImageQt(self.stegoImageLSB.image)
         pixmap = QPixmap.fromImage(qim)
-        pixmap = pixmap.scaled(self.imageStegoPicLabel.width(), self.imageStegoPicLabel.height(), QtCore.Qt.KeepAspectRatio)
-        self.imageStegoPicLabel.setPixmap(pixmap)
-        self.imageStegoPicLabel.setAlignment(QtCore.Qt.AlignCenter)
+        pixmap = pixmap.scaled(picLabel.width(), picLabel.height(), QtCore.Qt.KeepAspectRatio)
+        picLabel.setPixmap(pixmap)
+        picLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.imgRawPathInp.setText(fileName)
 
     # audio

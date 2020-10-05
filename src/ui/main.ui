@@ -182,7 +182,7 @@
      </widget>
     </widget>
     <widget class="QWidget" name="imageHidePage">
-     <widget class="QGroupBox" name="imageStegoGroup">
+     <widget class="QGroupBox" name="imageRawGroup">
       <property name="geometry">
        <rect>
         <x>60</x>
@@ -194,7 +194,7 @@
       <property name="title">
        <string>Raw Image</string>
       </property>
-      <widget class="QLabel" name="imageStegoPicLabel">
+      <widget class="QLabel" name="imageRawPicLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -210,7 +210,7 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
       </widget>
      </widget>
@@ -239,7 +239,7 @@
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QGroupBox" name="imageRawGroup">
+     <widget class="QGroupBox" name="imageStegoGroup">
       <property name="geometry">
        <rect>
         <x>590</x>
@@ -251,7 +251,7 @@
       <property name="title">
        <string>Stego Image</string>
       </property>
-      <widget class="QLabel" name="imageRawPicLabel">
+      <widget class="QLabel" name="imageStegoPicLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -267,7 +267,7 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
       </widget>
      </widget>
@@ -505,7 +505,7 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
       </widget>
      </widget>

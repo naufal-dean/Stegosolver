@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def rms(arr1 : np.ndarray, arr2 : np.ndarray):
     assert arr1.shape == arr2.shape
     diff = (arr1 - arr2) ** 2
