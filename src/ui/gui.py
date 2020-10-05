@@ -44,7 +44,19 @@ class MainWindow(QMainWindow):
         self.imgStegPathBtnE.clicked.connect(self.selectImageInput)
         # audio menu
         self.AHidePageButton.clicked.connect(self.audioHide)
+        self.AExtractPageButton.clicked.connect(self.audioExtract)
+        self.AAudioBackPageButton.clicked.connect(self.mainMenu)
+        # audio hide
         self.AHideButton.clicked.connect(self.audioHideFile)
+        self.ABackToAudioButtonH.clicked.connect(self.audio)
+        self.ASaveAudioH.hide()
+        self.APlayAudioH.hide()
+        self.PSNRLabelRes.hide()
+        self.audioPathFileDialogH.clicked.connect(self.audioInputPathChanged)
+        self.filePathFileDialogH.clicked.connect(self.fileInputPathChanged)
+        # audio extract
+        self.AExtractButton.clicked.connect(self.audioExtract)
+        
 
     def mainMenu(self):
         self.stackedWidget.setCurrentIndex(0)
@@ -116,23 +128,34 @@ class MainWindow(QMainWindow):
 
     # audio
     def audio(self):
+        # pindah ke page menu audio
         self.stackedWidget.setCurrentIndex(4)
 
     def audioHide(self):
+        # pindah ke page hide
         self.stackedWidget.setCurrentIndex(5)
 
     def audioHideFile(self):
-        audio_path = self.audioTextEdit.toPlainText()
-        file_path = self.fileTextEdit.toPlainText()
-        key = self.keyTextEdit.toPlainText()
-        hide = StegoAudio(key, audio_path)
-        hide.insert_data(file_path, self.ASeqCheck.isChecked())
-        hide.save_stego_audio("example/lol.wav")
-        extractor = StegoAudio(key, "example/lol.wav")
-        extractor.extract_data()
-        extractor.save_extracted_file("example/lala.pdf")
-        psnr("example/test.wav", "example/lol.wav")
-        print(file_path)
+        # tombol hide file
+        audio_path = self.audioTextEditH.toPlainText()
+        file_path = self.fileTextEditH.toPlainText()
+        key = self.keyTextEditH.toPlainText()
+        self.hideAudio = StegoAudio(key, audio_path)
+        self.stegoAudio.insert_data(file_path, self.ASeqCheck.isChecked())
+        self.ASaveAudioH.show()
+        self.APlayAudioH.show()
+        self.ASaveAudioH.clicked.connect(self.saveAudio)
+        self.APlayAudioH.clicked.connect(self.playAudio)
+        # hide.save_stego_audio("example/lol.wav")
+        # extractor = StegoAudio(key, "example/lol.wav")
+        # extractor.extract_data()
+        # extractor.save_extracted_file("example/lala.pdf")
+        # psnr("example/test.wav", "example/lol.wav")
+        # print(file_path)
+    
+    def saveAudio(self):
+        audio_res = self.
+        self.stegoAudio.save_stego_audio()
 
     # dialog window helper
     def dialogWindow(self, title, text, subtext="" , type="Information"):
