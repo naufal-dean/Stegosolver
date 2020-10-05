@@ -338,9 +338,9 @@ class MainWindow(QMainWindow):
                 self.APSNRLabelRes.show()
 
     def saveAudio(self):
-        fileName_audio, _ = QFileDialog.getSaveFileName(None, "Save Stego Audio", self.stegoAudio.audio_filename, "Audio Files (*.wav)")
-        self.stegoAudio.save_stego_audio(fileName_audio)
-        psnr = util.audio_psnr.psnr(self.audio_path_input, fileName_audio)
+        self.fileName_audio_save, _ = QFileDialog.getSaveFileName(None, "Save Stego Audio", self.stegoAudio.audio_filename, "Audio Files (*.wav)")
+        self.stegoAudio.save_stego_audio(self.fileName_audio_save)
+        psnr = util.audio_psnr.psnr(self.audio_path_input, self.fileName_audio_save)
         self.APSNRLabelRes.setText(str(psnr))
         self.APSNRLabelRes.show()
         self.APSNRLabel.show()
@@ -349,7 +349,7 @@ class MainWindow(QMainWindow):
     
     def playAudio(self):
         print("lala")
-        url = QtCore.QUrl.fromLocalFile(self.stegoAudio.audio_filename)
+        url = QtCore.QUrl.fromLocalFile(self.fileName_audio_save)
         content = QtMultimedia.QMediaContent(url)
         player = QtMultimedia.QMediaPlayer()
         player.setMedia(content)
