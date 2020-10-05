@@ -112,7 +112,6 @@ class MainWindow(QMainWindow):
             self.imageInpPicLabelE.clear()
             # path input
             self.imgStegPathInpE.clear()
-            self.imgFileOutPathInpE.clear()
             # key and others
             self.imgKeyInpE.clear()
             self.imgEncInpE.setChecked(False)
@@ -277,17 +276,17 @@ class MainWindow(QMainWindow):
         self.APathTextEditH.setText("")
         self.AFileTextEditH.setText("")
         self.APathTextEditE.setText("")
-    
+
     def selectAudioInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Audio", "", "Audio Files (*.wav)")
         if fileName:
             self.APathTextEditH.setText(fileName)
-    
+
     def selectAudioExtractInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Audio", "", "Audio Files (*.wav)")
         if fileName:
             self.APathTextEditE.setText(fileName)
-    
+
     def selectMessageInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Message File", "", "All (*)")
         if fileName:
@@ -348,7 +347,7 @@ class MainWindow(QMainWindow):
         self.APSNRLabelRes.setText(str(psnr))
         self.APSNRLabelRes.show()
         self.APSNRLabel.show()
-    
+
     def playAudio(self):
         print("lala")
         url = QtCore.QUrl.fromLocalFile(self.stegoAudio.audio_filename)
