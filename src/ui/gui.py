@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import sqlite3
 import time
@@ -70,7 +71,7 @@ class MainWindow(QMainWindow):
         self.ASaveMessage.hide()
         # self.APlayAudioE.hide()
         self.AFilePathFileDialogE.clicked.connect(self.selectAudioExtractInput)
-        
+
         # video menu
         self.VHidePageButton.clicked.connect(self.videoHide)
         self.VExtractPageButton.clicked.connect(self.videoExtract)
@@ -107,6 +108,7 @@ class MainWindow(QMainWindow):
             self.imgKeyInp.clear()
             self.imgEncInp.setChecked(False)
             self.imgNonSeqInp.setChecked(False)
+            self.imgPSNRvalueLbl.clear()
         elif self.stackedWidget.currentIndex() == 3:
             # image
             self.imageInpPicLabelE.clear()
@@ -201,6 +203,19 @@ class MainWindow(QMainWindow):
             self.dialogWindow("Error Happened", str(e), subtext="", type="Warning")
         else:
             self.dialogWindow("Succeed Inserting Message", "To save the stego image, click 'Save Output'", subtext="", type="Information")
+            try:
+                image_data_1 = np.array(stegoImage.image)
+                image_data_2 = np.array(stegoImage.stego_image)
+                if self.imgMethUsedInp.currentText() == "LSB":
+                    psnr = str(util.image_psnr.psnr(image_data_1, image_data_2))
+                elif self.imgMethUsedInp.currentText() == "BPCS":
+                    image_data_1 = stegoImage.pad_image(image_data_1)
+                    psnr = str(util.image_psnr.psnr(image_data_1, image_data_2))
+                else:
+                    psnr = ""
+                self.imgPSNRvalueLbl.setText(psnr)
+            except Exception as e:
+                print(e)
 
     def setImageOutput(self, stegoImage):
         picLabel = self.imageStegoPicLabel
@@ -351,21 +366,21 @@ class MainWindow(QMainWindow):
     def playAudio(self):
         print("lala")
         url = QtCore.QUrl.fromLocalFile(self.stegoAudio.audio_filename)
-    
+
     def video(self):
         # pindah ke page menu video
         self.stackedWidget.setCurrentIndex(9)
-    
+
     def selectVideoInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Video", "", "Video Files (*.avi)")
         if fileName:
             self.VPathTextEditH.setText(fileName)
-    
+
     def selectVideoExtractInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Video", "", "Video Files (*.avi)")
         if fileName:
             self.VPathTextEditE.setText(fileName)
-    
+
     def selectMessageInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Message File", "", "All (*)")
         if fileName:
@@ -411,7 +426,7 @@ class MainWindow(QMainWindow):
         # extractor.save_extracted_file("example/lala.pdf")
         # psnr("example/test.wav", "example/lol.wav")
         # print(file_path)
-    
+
     def playVideo(self):
         self.stegoVideo.ffmpeg_playvideo(self.fileName_video)
 
