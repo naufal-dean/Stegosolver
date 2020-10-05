@@ -89,25 +89,3 @@ class LSBHelper:
         contents = i2b(int(next_n_byte_lsb(contents_len), 2), contents_len)
         # return
         return filename, contents
-
-
-if __name__ == '__main__':
-    import random
-    container = [random.randint(0, 255) for i in range(2000)]
-    # print(container)
-
-    is_sequential = False
-    filename = 'filename.txt'
-    contents = b'testcontentgan'
-
-    # payload = LSBHelper.craft_payload(is_sequential, filename, contents)
-    # print(payload)
-
-    new_container = LSBHelper.insert_data_as_lsb(container, is_sequential, filename, contents, 'seed')
-
-    filename, contents = LSBHelper.extract_data_from_lsb(new_container, 'seed')
-    print(len(filename))
-    print(len(contents))
-
-    print(filename)
-    print(contents)

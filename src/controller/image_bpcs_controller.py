@@ -450,23 +450,3 @@ class MessagePacker:
         filename = payload[1:1+filename_len].decode('latin-1')
         contents = payload[1+filename_len:]
         return filename, contents
-
-
-if __name__ == '__main__':
-    import time
-
-    st = time.time()
-    s = StegoImageBPCS('../example/raw.png')
-    s.insert_data('test.jpg', True)
-    s.save_stego_image('out.png')
-    del s
-    ed = time.time()
-    print(f'time = {ed - st}')
-    print()
-
-    st = time.time()
-    s2 = StegoImageBPCS('out.png')
-    s2.extract_data()
-    s2.save_extracted_data('test_out.jpg')
-    ed = time.time()
-    print(f'time = {ed - st}')

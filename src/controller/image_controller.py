@@ -57,13 +57,3 @@ class StegoImage:
         out_path = out_path or self.extracted_filename or 'default.txt'
         with open(out_path, 'wb') as f:
             f.write(self.extracted_data)
-
-
-# if __name__ == '__main__':
-#     ic = StegoImage('example/raw.png')
-#     ic.insert_data('main.py', False, 'someseed')
-#     ic.image.save('test.png')
-#     oc = StegoImage('test.png')
-#     f = oc.extract_data('test.txt', 'someseed')
-#     print(f)
-#     exit()
