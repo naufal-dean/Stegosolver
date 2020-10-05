@@ -12,7 +12,6 @@ from PyQt5.QtWidgets import *
 import util.image_psnr, util.audio_psnr
 from datetime import date
 from controller import StegoAudio, StegoImage, StegoImageBPCS, StegoVideo
-from controller.audio_controller import psnr
 
 
 class MainWindow(QMainWindow):
@@ -58,12 +57,12 @@ class MainWindow(QMainWindow):
         self.ABackToAudioButtonH.clicked.connect(self.audio)
         self.ASaveAudioH.hide()
         self.APlayAudioH.hide()
-        self.PSNRLabelRes.hide()
-        self.audioPathFileDialogH.clicked.connect(self.audioInputPathChanged)
-        self.filePathFileDialogH.clicked.connect(self.fileInputPathChanged)
+        self.APSNRLabelRes.hide()
+        # self.APathFileDialogH.clicked.connect(self.audioInputPathChanged)
+        # self.AFilePathFileDialogH.clicked.connect(self.fileInputPathChanged)
         # audio extract
         self.AExtractButton.clicked.connect(self.audioExtractFile)
-        self.ASaveAudioE.hide()
+        self.ASaveMessage.hide()
         self.APlayAudioE.hide()
         
 
@@ -249,6 +248,8 @@ class MainWindow(QMainWindow):
         self.APlayAudioE.clicked.connect(self.playAudio)
     
     def saveMessageFromAudio(self):
+        fileName, _ = QFileDialog.getSaveFileName(None, "Save Message Stego Audio", self.stegoAudio.filename, "All (*)")
+        self.stegoAudio.save_extracted_file(fileName)
 
     def audioHide(self):
         # pindah ke page hide

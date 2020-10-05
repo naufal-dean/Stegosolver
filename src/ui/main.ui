@@ -859,7 +859,7 @@
        <string>Sequential</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="AHideButtonH">
+     <widget class="QPushButton" name="AHideButton">
       <property name="geometry">
        <rect>
         <x>460</x>
