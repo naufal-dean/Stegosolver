@@ -222,9 +222,9 @@
       <widget class="QPushButton" name="backImagePageNavBtn">
        <property name="geometry">
         <rect>
-         <x>820</x>
+         <x>810</x>
          <y>70</y>
-         <width>171</width>
+         <width>181</width>
          <height>51</height>
         </rect>
        </property>
@@ -331,7 +331,7 @@
       <widget class="QPushButton" name="imgHideFileBtn">
        <property name="geometry">
         <rect>
-         <x>820</x>
+         <x>810</x>
          <y>20</y>
          <width>81</width>
          <height>41</height>

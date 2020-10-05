@@ -15,14 +15,28 @@ class MainWindow(QMainWindow):
         loadUi(os.getcwd() + '/ui/main.ui', self)
 
         self.stackedWidget.setCurrentIndex(0)
+        self.imageButton.clicked.connect(self.image)
         self.audioButton.clicked.connect(self.audio)
 
-    def audio(self):
+    def image(self):
         self.stackedWidget.setCurrentIndex(1)
+        self.imageHideNavBtn.clicked.connect(self.imageHide)
+        self.imageExtractNavBtn.clicked.connect(self.imageExtract)
+
+    def imageHide(self):
+        self.stackedWidget.setCurrentIndex(2)
+        self.backImagePageNavBtn.clicked.connect(self.image)
+
+    def imageExtract(self):
+        self.stackedWidget.setCurrentIndex(3)
+        self.backImagePageNavBtnE.clicked.connect(self.image)
+
+    def audio(self):
+        self.stackedWidget.setCurrentIndex(4)
         self.AHidePageButton.clicked.connect(self.audioHide)
 
     def audioHide(self):
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(5)
         self.AHideButton.clicked.connect(self.audioHideFile)
 
     def audioHideFile(self):
@@ -37,5 +51,3 @@ class MainWindow(QMainWindow):
         extractor.save_extracted_file("example/lala.pdf")
         psnr("example/test.wav", "example/lol.wav")
         print(file_path)
-
-
