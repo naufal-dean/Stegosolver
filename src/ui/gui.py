@@ -45,6 +45,8 @@ class MainWindow(QMainWindow):
         self.backImagePageNavBtnE.clicked.connect(self.image)
         self.imgStegPathInpE.returnPressed.connect(self.imageInputPathChanged)
         self.imgStegPathBtnE.clicked.connect(self.selectImageInput)
+        self.imgExtractButton.clicked.connect(self.imageExecExtractFile)
+        self.imgSaveOutButtonE.clicked.connect(self.imageSaveOutfile)
         # audio menu
         self.AHidePageButton.clicked.connect(self.audioHide)
         self.AHideButton.clicked.connect(self.audioHideFile)
@@ -85,6 +87,7 @@ class MainWindow(QMainWindow):
     def imageExtract(self):
         self.stackedWidget.setCurrentIndex(3)
 
+    # IMAGE HIDE
     # image input
     def selectImageInput(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Select Image", "", "Image Files (*.png *.bmp)")
@@ -145,6 +148,20 @@ class MainWindow(QMainWindow):
         stegoImage = self.stegoImageLSB
         fileName, _ = QFileDialog.getSaveFileName(None, "Save Stego Image", "", "All (*)")
         stegoImage.save_stego_image(fileName)
+
+    # IMAGE EXTRACT
+    # exec extract file
+    def imageExecExtractFile(self):
+        stegoImage = self.stegoImageLSB
+        key = self.imgKeyInpE.text()
+        stegoImage.extract_data(key)
+
+    # save extracted file
+    def imageSaveOutfile(self):
+        stegoImage = self.stegoImageLSB
+        defaultFilename = stegoImage.extracted_filename
+        fileName, _ = QFileDialog.getSaveFileName(None, "Save Extracted File", defaultFilename, "All (*)")
+        stegoImage.save_extracted_data(fileName)
 
     # audio
     def audio(self):
