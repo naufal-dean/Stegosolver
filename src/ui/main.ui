@@ -866,12 +866,12 @@
        <rect>
         <x>250</x>
         <y>460</y>
-        <width>111</width>
+        <width>79</width>
         <height>21</height>
        </rect>
       </property>
       <property name="text">
-       <string>Non Sequential</string>
+       <string>Sequential</string>
       </property>
      </widget>
      <widget class="QPushButton" name="AHideButton">
