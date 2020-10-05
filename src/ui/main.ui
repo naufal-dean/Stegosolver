@@ -222,9 +222,9 @@
       <widget class="QPushButton" name="backImagePageNavBtn">
        <property name="geometry">
         <rect>
-         <x>810</x>
+         <x>820</x>
          <y>70</y>
-         <width>181</width>
+         <width>171</width>
          <height>51</height>
         </rect>
        </property>
@@ -280,7 +280,7 @@
          </layout>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="fileInpPathLbl">
+         <widget class="QLabel" name="imgFileInpPathLbl">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -309,16 +309,16 @@
          <widget class="QComboBox" name="imgMethUsedInp"/>
         </item>
         <item row="1" column="1">
-         <layout class="QGridLayout" name="fileInpPathGrid">
+         <layout class="QGridLayout" name="imgFileInpPathGrid">
           <item row="0" column="1">
-           <widget class="QToolButton" name="fileInpPathBtn">
+           <widget class="QToolButton" name="imgFileInpPathBtn">
             <property name="text">
              <string>...</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLineEdit" name="fileInpPathInp">
+           <widget class="QLineEdit" name="imgFileInpPathInp">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -328,17 +328,17 @@
         </item>
        </layout>
       </widget>
-      <widget class="QPushButton" name="imgHideBtn">
+      <widget class="QPushButton" name="imgHideFileBtn">
        <property name="geometry">
         <rect>
-         <x>810</x>
+         <x>820</x>
          <y>20</y>
-         <width>181</width>
+         <width>81</width>
          <height>41</height>
         </rect>
        </property>
        <property name="text">
-        <string>Hide File to Image</string>
+        <string>Hide File</string>
        </property>
       </widget>
       <widget class="QWidget" name="formLayoutWidget_3">
@@ -396,6 +396,265 @@
          </widget>
         </item>
        </layout>
+      </widget>
+      <widget class="QPushButton" name="imgSaveOutBtn">
+       <property name="geometry">
+        <rect>
+         <x>910</x>
+         <y>20</y>
+         <width>81</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Save Output</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="imageExtractPage">
+     <widget class="QGroupBox" name="imageInpGroupE">
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>70</y>
+        <width>471</width>
+        <height>431</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Stego Image Input</string>
+      </property>
+      <widget class="QLabel" name="imageInpPicLabelE">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>451</width>
+         <height>401</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="imageExtractTitle">
+      <property name="geometry">
+       <rect>
+        <x>440</x>
+        <y>20</y>
+        <width>231</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI Semibold</family>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Image Extract</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::AutoText</enum>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="imageMenuGroupE">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>510</y>
+        <width>1001</width>
+        <height>131</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Menu</string>
+      </property>
+      <widget class="QPushButton" name="backImagePageNavBtnE">
+       <property name="geometry">
+        <rect>
+         <x>810</x>
+         <y>70</y>
+         <width>181</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Back to Image Stegano Menu</string>
+       </property>
+      </widget>
+      <widget class="QWidget" name="formLayoutWidget_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>491</width>
+         <height>101</height>
+        </rect>
+       </property>
+       <layout class="QFormLayout" name="imageLeftFormE">
+        <item row="0" column="0">
+         <widget class="QLabel" name="imgStegPathLblE">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Steg Image Path</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <layout class="QGridLayout" name="imgStegPathGridE">
+          <item row="0" column="1">
+           <widget class="QToolButton" name="imgStegPathBtnE">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLineEdit" name="imgStegPathInpE">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="imgFileOutPathLblE">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>File Output Path</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="imgMethUsedLblE">
+          <property name="text">
+           <string>Method Used</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="imgMethUsedInpE"/>
+        </item>
+        <item row="1" column="1">
+         <layout class="QGridLayout" name="imgFileOutPathGridE">
+          <item row="0" column="1">
+           <widget class="QToolButton" name="imgFileOutPathBtnE">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLineEdit" name="imgFileOutPathInpE">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QPushButton" name="imgExtractButton">
+       <property name="geometry">
+        <rect>
+         <x>810</x>
+         <y>20</y>
+         <width>81</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Extract</string>
+       </property>
+      </widget>
+      <widget class="QWidget" name="formLayoutWidget_5">
+       <property name="geometry">
+        <rect>
+         <x>510</x>
+         <y>20</y>
+         <width>291</width>
+         <height>101</height>
+        </rect>
+       </property>
+       <layout class="QFormLayout" name="imageRightFormE">
+        <item row="0" column="0">
+         <widget class="QLabel" name="imgKeyLblE">
+          <property name="text">
+           <string>Key (If Needed)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="imgKeyInpE"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="imgEncLblE">
+          <property name="text">
+           <string>Encryption</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QCheckBox" name="imgEncInpE">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QPushButton" name="imgSaveOutButtonE">
+       <property name="geometry">
+        <rect>
+         <x>910</x>
+         <y>20</y>
+         <width>81</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Save Output</string>
+       </property>
       </widget>
      </widget>
     </widget>
