@@ -607,51 +607,14 @@
          </layout>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="imgFileOutPathLblE">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>File Output Path</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
          <widget class="QLabel" name="imgMethUsedLblE">
           <property name="text">
            <string>Method Used</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="imgMethUsedInpE"/>
-        </item>
         <item row="1" column="1">
-         <layout class="QGridLayout" name="imgFileOutPathGridE">
-          <item row="0" column="1">
-           <widget class="QToolButton" name="imgFileOutPathBtnE">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLineEdit" name="imgFileOutPathInpE">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QComboBox" name="imgMethUsedInpE"/>
         </item>
        </layout>
       </widget>
@@ -723,44 +686,82 @@
      </widget>
     </widget>
     <widget class="QWidget" name="audioPage">
-     <widget class="QPushButton" name="AHidePageButton">
+     <widget class="QLabel" name="audioPageTitle">
       <property name="geometry">
        <rect>
-        <x>450</x>
-        <y>230</y>
-        <width>201</width>
-        <height>71</height>
+        <x>440</x>
+        <y>20</y>
+        <width>231</width>
+        <height>41</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI Semibold</family>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
       <property name="text">
-       <string>HIDE MESSAGE</string>
+       <string>Audio Steganography</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::AutoText</enum>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QPushButton" name="AExtractPageButton">
+     <widget class="QGroupBox" name="AMenuGroup">
       <property name="geometry">
        <rect>
-        <x>450</x>
-        <y>300</y>
-        <width>201</width>
-        <height>71</height>
+        <x>410</x>
+        <y>160</y>
+        <width>291</width>
+        <height>331</height>
        </rect>
       </property>
-      <property name="text">
-       <string>EXTRACT MESSAGE</string>
+      <property name="title">
+       <string>Audio Steganography Menu</string>
       </property>
-     </widget>
-     <widget class="QPushButton" name="AAudioBackPageButton">
-      <property name="geometry">
-       <rect>
-        <x>450</x>
-        <y>370</y>
-        <width>201</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>BACK TO MAIN MENU</string>
-      </property>
+      <widget class="QPushButton" name="AHidePageButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>30</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hide Message</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="AAudioBackPageButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>230</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Back to Main Menu</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="AExtractPageButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>130</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Extract Message</string>
+       </property>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="audioHidePage">
@@ -1030,6 +1031,19 @@
        <string>Audio path:</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="APlayAudioE">
+      <property name="geometry">
+       <rect>
+        <x>690</x>
+        <y>380</y>
+        <width>171</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>PLAY AUDIO</string>
+      </property>
+     </widget>
      <widget class="QTextEdit" name="APathTextEditE">
       <property name="geometry">
        <rect>
@@ -1054,7 +1068,7 @@
       <property name="geometry">
        <rect>
         <x>690</x>
-        <y>380</y>
+        <y>430</y>
         <width>171</width>
         <height>41</height>
        </rect>
@@ -1405,43 +1419,81 @@
      </widget>
     </widget>
     <widget class="QWidget" name="videoPage">
-     <widget class="QPushButton" name="VHidePageButton">
+     <widget class="QGroupBox" name="VMenuGroup">
       <property name="geometry">
        <rect>
-        <x>490</x>
-        <y>260</y>
-        <width>201</width>
-        <height>71</height>
+        <x>410</x>
+        <y>160</y>
+        <width>291</width>
+        <height>331</height>
        </rect>
       </property>
-      <property name="text">
-       <string>HIDE MESSAGE</string>
+      <property name="title">
+       <string>Video Steganography Menu</string>
       </property>
+      <widget class="QPushButton" name="VBackPageButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>230</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Back to Main Menu</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="VExtractPageButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>130</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Extract Message</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="VHidePageButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>30</y>
+         <width>251</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hide Message</string>
+       </property>
+      </widget>
      </widget>
-     <widget class="QPushButton" name="VExtractPageButton">
+     <widget class="QLabel" name="videoPageTitle">
       <property name="geometry">
        <rect>
-        <x>490</x>
-        <y>330</y>
-        <width>201</width>
-        <height>71</height>
+        <x>440</x>
+        <y>20</y>
+        <width>231</width>
+        <height>41</height>
        </rect>
       </property>
-      <property name="text">
-       <string>EXTRACT MESSAGE</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="VBackPageButton">
-      <property name="geometry">
-       <rect>
-        <x>490</x>
-        <y>400</y>
-        <width>201</width>
-        <height>71</height>
-       </rect>
+      <property name="font">
+       <font>
+        <family>Segoe UI Semibold</family>
+        <pointsize>13</pointsize>
+       </font>
       </property>
       <property name="text">
-       <string>BACK TO MAIN MENU</string>
+       <string>Video Steganography</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::AutoText</enum>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </widget>
