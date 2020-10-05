@@ -3,7 +3,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QFile
 from ui.gui import MainWindow
-from controller import StegoImage, StegoAudio
+from controller import StegoAudio, StegoImage, StegoImageBPCS, StegoVideo
 from controller.audio_controller import psnr
 
 # if __name__ == '__main__':
@@ -30,4 +30,3 @@ if __name__ == '__main__':
     mainWindow = MainWindow()
     mainWindow.show()
     sys.exit(app.exec())
-
